@@ -50,11 +50,11 @@ function fromStaticPackage(item: any): PublicPackage {
   };
 }
 
-function fallbackPackages() {
+export function fallbackPackages() {
   return allPackages.map(fromStaticPackage);
 }
 
-function fallbackCollections(): PublicPackageCollection[] {
+export function fallbackCollections(): PublicPackageCollection[] {
   const packages = fallbackPackages();
   const bySlug = new Map(packages.map((pkg) => [pkg.slug, pkg]));
   return staticCollections.map((collection, index) => ({

@@ -38,7 +38,7 @@ export default async function LocalSpecialtiesPage() {
   return (
     <main className="specialty-page">
       <SiteHeader variant="hero" />
-      <section className="page-hero offers-hero" style={{ backgroundImage: "linear-gradient(90deg, rgba(10, 20, 17, 0.78), rgba(10, 20, 17, 0.26)), url('https://images.unsplash.com/photo-1555931202-3c1a7042fbd1?auto=format&fit=crop&q=80&w=1600')" }}>
+      <section className="page-hero offers-hero" style={{ backgroundImage: "linear-gradient(90deg, rgba(10, 20, 17, 0.78), rgba(10, 20, 17, 0.26)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=85&w=1800')" }}>
         <p className="eyebrow">{t("localSpecialty", "hero_eyebrow", "Đặc sản Sơn La")}</p>
         <h1>{t("localSpecialty", "hero_title", "Tinh hoa Tây Bắc qua từng món ngon Sơn La.")}</h1>
         <p>{t("localSpecialty", "hero_copy", "Khám phá các món đặc sản Sơn La, nơi lưu giữ hương vị núi rừng, gia vị bản địa và câu chuyện bếp nhà Tây Bắc.")}</p>

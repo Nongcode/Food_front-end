@@ -7,13 +7,18 @@ export const destinations = [
   "Phù Yên",
 ];
 
-const foodImages = {
-  hero: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80",
-  smoked: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80",
-  spice: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=1200&q=80",
-  tea: "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?auto=format&fit=crop&w=1200&q=80",
-  fruit: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?auto=format&fit=crop&w=1200&q=80",
-  gift: "https://images.unsplash.com/photo-1607344645866-009c7d88bc49?auto=format&fit=crop&w=1200&q=80",
+export const foodImages = {
+  hero: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1400&q=82",
+  table: "https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=1400&q=82",
+  smoked: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1400&q=82",
+  spice: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=1400&q=82",
+  tea: "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?auto=format&fit=crop&w=1400&q=82",
+  fruit: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?auto=format&fit=crop&w=1400&q=82",
+  gift: "https://images.unsplash.com/photo-1607344645866-009c7d88bc49?auto=format&fit=crop&w=1400&q=82",
+  dried: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=1400&q=82",
+  honey: "https://images.unsplash.com/photo-1587049633312-d628ae50a8ae?auto=format&fit=crop&w=1400&q=82",
+  rice: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=1400&q=82",
+  hamper: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=1400&q=82",
 };
 
 export const posts = [
@@ -79,8 +84,8 @@ export const packages = [
     destination: "Mộc Châu",
     duration: "Đặt trước 1 ngày",
     price: "Từ 890.000đ",
-    summary: "Giỏ quà gồm trà, mận sấy, sữa chua nếp cẩm, mật ong và thiệp chúc mừng.",
-    image: foodImages.gift,
+    summary: "Giỏ quà gồm trà, mận sấy, mật ong, bánh đặc sản và thiệp chúc mừng.",
+    image: foodImages.hamper,
     status: "Đang mở",
   },
   {
@@ -105,7 +110,142 @@ export const packages = [
     image: foodImages.fruit,
     status: "Đang mở",
   },
+  {
+    id: 5,
+    slug: "thit-trau-gac-bep-cham-cheo",
+    name: "Thịt trâu gác bếp kèm chẩm chéo",
+    destination: "Sơn La",
+    duration: "Giao 2 - 4 ngày",
+    price: "Từ 450.000đ",
+    summary: "Thịt trâu gác bếp thái sẵn, gói kèm chẩm chéo để dùng trong bữa cơm hoặc làm mồi nhâm nhi.",
+    image: foodImages.smoked,
+    status: "Đang mở",
+  },
+  {
+    id: 6,
+    slug: "che-shan-tuyet-ta-xua",
+    name: "Chè Shan tuyết Tà Xùa",
+    destination: "Bắc Yên",
+    duration: "Giao 2 - 4 ngày",
+    price: "Từ 260.000đ",
+    summary: "Trà Shan tuyết hương dịu, hợp uống hằng ngày hoặc phối cùng hộp quà biếu nhẹ nhàng.",
+    image: foodImages.tea,
+    status: "Đang mở",
+  },
+  {
+    id: 7,
+    slug: "xoai-say-yen-chau",
+    name: "Xoài sấy dẻo Yên Châu",
+    destination: "Yên Châu",
+    duration: "Giao 2 - 4 ngày",
+    price: "Từ 150.000đ",
+    summary: "Xoài sấy dẻo vị chua ngọt, đóng túi nhỏ tiện mang đi chơi, văn phòng hoặc tặng bạn bè.",
+    image: foodImages.dried,
+    status: "Đang mở",
+  },
+  {
+    id: 8,
+    slug: "mat-ong-rung-son-la",
+    name: "Mật ong rừng Sơn La",
+    destination: "Thuận Châu",
+    duration: "Giao 2 - 4 ngày",
+    price: "Từ 220.000đ",
+    summary: "Mật ong đóng chai gọn, dùng pha trà, nấu ăn hoặc phối trong set quà chăm sóc sức khỏe.",
+    image: foodImages.honey,
+    status: "Đang mở",
+  },
+  {
+    id: 9,
+    slug: "set-bua-com-tay-bac",
+    name: "Set bữa cơm Tây Bắc",
+    destination: "Sơn La",
+    duration: "Giao 2 - 4 ngày",
+    price: "Từ 520.000đ",
+    summary: "Gợi ý gồm thịt gác bếp, gia vị chấm, rau củ sấy và hướng dẫn dùng cho bữa cơm gia đình.",
+    image: foodImages.table,
+    status: "Đang mở",
+  },
+  {
+    id: 10,
+    slug: "do-kho-picnic-son-la",
+    name: "Set đồ khô đi chơi cuối tuần",
+    destination: "Mộc Châu",
+    duration: "Giao 1 - 3 ngày",
+    price: "Từ 350.000đ",
+    summary: "Đồ khô, trái cây sấy và gia vị chấm đóng gói nhỏ, tiện chia sẻ khi picnic hoặc đi xa.",
+    image: foodImages.dried,
+    status: "Đang mở",
+  },
+  {
+    id: 11,
+    slug: "hop-qua-doi-tac-tay-bac",
+    name: "Hộp quà đối tác Tây Bắc",
+    destination: "Sơn La",
+    duration: "Đặt trước 2 ngày",
+    price: "Từ 1.250.000đ",
+    summary: "Hộp quà chỉnh chu gồm trà, mật ong, trái cây sấy, gia vị và thiệp riêng cho doanh nghiệp.",
+    image: foodImages.hamper,
+    status: "Đang mở",
+  },
+  {
+    id: 12,
+    slug: "combo-gia-vi-nuong",
+    name: "Combo gia vị món nướng Tây Bắc",
+    destination: "Sơn La",
+    duration: "Giao 2 - 4 ngày",
+    price: "Từ 240.000đ",
+    summary: "Mắc khén, hạt dổi, muối chẩm chéo và gợi ý tẩm ướp cho thịt nướng, gà nướng, rau củ.",
+    image: foodImages.spice,
+    status: "Đang mở",
+  },
+  {
+    id: 13,
+    slug: "man-hau-moc-chau-theo-mua",
+    name: "Mận hậu Mộc Châu theo mùa",
+    destination: "Mộc Châu",
+    duration: "Theo lịch thu hái",
+    price: "Từ 280.000đ",
+    summary: "Mận hậu chọn lứa, đóng hộp theo ngày thu hái, phù hợp ăn tươi hoặc làm quà mùa hè.",
+    image: foodImages.fruit,
+    status: "Theo mùa",
+  },
+  {
+    id: 14,
+    slug: "gao-nep-nuong-son-la",
+    name: "Gạo nếp nương Sơn La",
+    destination: "Mai Sơn",
+    duration: "Giao 2 - 4 ngày",
+    price: "Từ 190.000đ",
+    summary: "Gạo nếp thơm dùng nấu xôi, làm bánh hoặc phối cùng combo bữa cơm gia đình.",
+    image: foodImages.rice,
+    status: "Đang mở",
+  },
+  {
+    id: 15,
+    slug: "set-qua-tet-son-la",
+    name: "Set quà Tết Sơn La",
+    destination: "Sơn La",
+    duration: "Đặt trước 3 ngày",
+    price: "Từ 1.490.000đ",
+    summary: "Set quà lớn gồm trà, thịt gác bếp, mật ong, trái cây sấy và gia vị, phù hợp biếu gia đình hoặc đối tác.",
+    image: foodImages.gift,
+    status: "Đang mở",
+  },
+  {
+    id: 16,
+    slug: "combo-trai-cay-say-mix",
+    name: "Combo trái cây sấy mix",
+    destination: "Yên Châu",
+    duration: "Giao 2 - 4 ngày",
+    price: "Từ 210.000đ",
+    summary: "Xoài, mận, chuối và nông sản sấy theo mùa, chia túi nhỏ dễ dùng và dễ làm quà.",
+    image: foodImages.dried,
+    status: "Đang mở",
+  },
 ];
+
+const bySlug = Object.fromEntries(packages.map((item) => [item.slug, item]));
+const pick = (...slugs: string[]) => slugs.map((slug) => bySlug[slug]).filter(Boolean);
 
 export const packageCollections = [
   {
@@ -113,34 +253,49 @@ export const packageCollections = [
     title: "Set đặc sản dễ dùng cho bữa cơm nhà",
     description: "Các món quen vị, dễ chế biến, phù hợp dùng thử hoặc gửi cho người thân.",
     accent: "family",
-    items: [packages[0], packages[2], packages[3]],
+    items: pick("combo-dac-san-son-la", "thit-trau-gac-bep-cham-cheo", "set-bua-com-tay-bac", "gao-nep-nuong-son-la"),
   },
   {
     eyebrow: "Quà tặng bạn bè",
     title: "Món Tây Bắc nhỏ gọn, dễ chia sẻ",
     description: "Đồ ăn vặt, gia vị và set quà đẹp để mang đi chơi, đi picnic hoặc tặng bạn bè.",
     accent: "youth",
-    items: [packages[1], packages[2], packages[3]],
+    items: pick("do-kho-picnic-son-la", "xoai-say-yen-chau", "combo-trai-cay-say-mix", "gia-vi-cham-cheo-mac-khen"),
   },
   {
     eyebrow: "Đặc sản Sơn La tiêu biểu",
     title: "Những hương vị nên thử đầu tiên",
     description: "Tuyển chọn các món nổi bật nhất của Sơn La để khách mới dễ chọn.",
     accent: "vietnam",
-    items: [packages[0], packages[1], packages[2], packages[3]],
+    items: pick("combo-dac-san-son-la", "che-shan-tuyet-ta-xua", "gia-vi-cham-cheo-mac-khen", "combo-trai-cay-yen-chau"),
+  },
+  {
+    eyebrow: "Quà biếu",
+    title: "Set quà chỉn chu theo dịp",
+    description: "Hộp quà, giỏ quà và set biếu tặng có thể tùy chỉnh theo ngân sách, số lượng và dịp tặng.",
+    accent: "gift",
+    items: pick("set-qua-moc-chau-cao-cap", "hop-qua-doi-tac-tay-bac", "set-qua-tet-son-la", "mat-ong-rung-son-la"),
+  },
+  {
+    eyebrow: "Gia vị Tây Bắc",
+    title: "Mắc khén, chẩm chéo và đồ chấm",
+    description: "Nhóm gia vị giúp món nướng, món luộc và trái cây xanh rõ hương vị Sơn La hơn.",
+    accent: "spice",
+    items: pick("gia-vi-cham-cheo-mac-khen", "combo-gia-vi-nuong", "thit-trau-gac-bep-cham-cheo", "set-bua-com-tay-bac"),
+  },
+  {
+    eyebrow: "Nông sản theo mùa",
+    title: "Trái cây và sản phẩm mùa vụ",
+    description: "Mận hậu, xoài Yên Châu và các món sấy đóng gói theo lịch thu hái thực tế.",
+    accent: "fruit",
+    items: pick("combo-trai-cay-yen-chau", "man-hau-moc-chau-theo-mua", "xoai-say-yen-chau", "combo-trai-cay-say-mix"),
   },
 ];
 
-export const allPackages = Array.from(
-  new Map(
-    packageCollections
-      .flatMap((collection) => collection.items)
-      .map((item) => [item.slug, item]),
-  ).values(),
-);
+export const allPackages = packages;
 
 export const packageDetailExtras = {
-  gallery: [foodImages.gift, foodImages.smoked, foodImages.spice, foodImages.tea, foodImages.fruit],
+  gallery: [foodImages.hero, foodImages.smoked, foodImages.spice, foodImages.tea, foodImages.fruit],
   benefits: [
     "Tư vấn phối combo theo khẩu vị, ngân sách và dịp tặng",
     "Gợi ý cách bảo quản, hâm nóng và dùng kèm từng món",
@@ -168,7 +323,7 @@ export const packageDetailExtras = {
 
 export const tripStyles = [
   {
-    title: "Tuyển chọn từ hộ bán địa phương",
+    title: "Tuyển chọn từ hộ bản địa phương",
     detail: "Ưu tiên sản phẩm có câu chuyện rõ ràng, phù hợp để giới thiệu đặc sản Sơn La tới khách mới.",
     image: foodImages.gift,
   },
@@ -210,7 +365,7 @@ export const packageDetailMediaBySlug: Record<
     item.slug,
     {
       banner: item.image,
-      gallery: [item.image, foodImages.smoked, foodImages.spice, foodImages.tea, foodImages.fruit],
+      gallery: [item.image, foodImages.hero, foodImages.smoked, foodImages.spice, foodImages.tea, foodImages.fruit],
     },
   ]),
 );
