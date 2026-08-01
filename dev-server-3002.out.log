@@ -1,0 +1,17 @@
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3002
+- Network:       http://192.168.169.1:3002
+- Environments: .env
+✓ Ready in 941ms
+Creating turbopack project { dir: 'D:\\Duc-TPE\\sonla-food-frontend', testMode: true }
+
+ GET / 200 in 4.6s (next.js: 3.1s, proxy.ts: 215ms, application-code: 1339ms)
+ GET / 200 in 668ms (next.js: 9ms, proxy.ts: 6ms, application-code: 653ms)
+ GET /goi-du-lich 200 in 987ms (next.js: 584ms, proxy.ts: 5ms, application-code: 398ms)
+ GET /dac-san 200 in 638ms (next.js: 434ms, proxy.ts: 4ms, application-code: 200ms)
+ GET /tin-tuc 200 in 612ms (next.js: 398ms, proxy.ts: 6ms, application-code: 208ms)
+ GET /lien-he 200 in 781ms (next.js: 418ms, proxy.ts: 6ms, application-code: 357ms)
+ GET /goi-du-lich/combo-dac-san-son-la 200 in 3.3s (next.js: 1287ms, proxy.ts: 6ms, generate-params: 851ms, application-code: 2.1s)
+ GET /dac-san/xoai-tron-yen-chau 200 in 3.1s (next.js: 1284ms, proxy.ts: 5ms, generate-params: 890ms, application-code: 1815ms)
+ GET /tin-tuc/3 200 in 3.3s (next.js: 1476ms, proxy.ts: 11ms, generate-params: 959ms, application-code: 1818ms)
+[?25h
