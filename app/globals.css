@@ -9156,3 +9156,58 @@ body>main {
     background-attachment: scroll;
   }
 }
+
+/* Synced hero copy carousel */
+.hero-text-cycle {
+  display: grid;
+  max-width: 1060px;
+  isolation: isolate;
+}
+
+.hero-text-cycle h1 {
+  margin-bottom: 20px;
+}
+
+.hero-slide-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 18px;
+  margin: -10px 0 24px;
+}
+
+.hero-slide-dots button {
+  width: 9px;
+  height: 9px;
+  border: 1px solid rgba(255, 244, 207, 0.68);
+  border-radius: 999px;
+  background: rgba(255, 244, 207, 0.28);
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  transition: width 220ms ease, background 220ms ease, border-color 220ms ease, transform 220ms ease;
+}
+
+.hero-slide-dots button:hover,
+.hero-slide-dots button:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(255, 211, 122, 0.72);
+}
+
+.hero-slide-dots button.active {
+  width: 30px;
+  background: #ffd37a;
+  border-color: #ffd37a;
+}
+
+@media (max-width: 640px) {
+  .hero-slide-dots {
+    margin: -6px 0 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide-dots button {
+    transition: none;
+  }
+}

@@ -28,6 +28,13 @@ export function proxy(request: NextRequest) {
 
   const token = request.cookies.get("admin_token")?.value;
 
+  if (effectivePathname === "/goi-du-lich" || effectivePathname.startsWith("/goi-du-lich/")) {
+    const redirectUrl = request.nextUrl.clone();
+    const nextPath = effectivePathname.replace(/^\/goi-du-lich/, "/combo-dac-san");
+    redirectUrl.pathname = `${localePrefix(localized.locale)}${nextPath}`;
+    return NextResponse.redirect(redirectUrl, 308);
+  }
+
   const isInternalLocaleRewrite = request.headers.has("x-locale");
   const hasExplicitLocale = localized.pathname !== pathname;
   const preferredLocale = detectLocaleFromAcceptLanguage(request.headers.get("accept-language"));

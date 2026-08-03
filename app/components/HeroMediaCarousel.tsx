@@ -2,33 +2,37 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
-type HeroMediaItem = {
+export type HeroMediaItem = {
   src: string;
   mediaType: "image" | "video";
   title?: string | null;
+  subtitle?: string | null;
 };
 
 type HeroMediaCarouselProps = {
   items: HeroMediaItem[];
+  activeIndex?: number;
+  intervalMs?: number;
 };
 
-export function HeroMediaCarousel({ items }: HeroMediaCarouselProps) {
+export function HeroMediaCarousel({ items, activeIndex, intervalMs = 7200 }: HeroMediaCarouselProps) {
   const slides = useMemo(() => items.filter((item) => item.src), [items]);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [internalActiveIndex, setInternalActiveIndex] = useState(0);
+  const isControlled = typeof activeIndex === "number";
 
   useEffect(() => {
-    if (slides.length < 2) return;
+    if (isControlled || slides.length < 2) return;
 
     const timer = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % slides.length);
-    }, 7200);
+      setInternalActiveIndex((current) => (current + 1) % slides.length);
+    }, intervalMs);
 
     return () => window.clearInterval(timer);
-  }, [slides.length]);
+  }, [intervalMs, isControlled, slides.length]);
 
   if (slides.length === 0) return null;
 
-  const safeActiveIndex = activeIndex % slides.length;
+  const safeActiveIndex = (isControlled ? activeIndex : internalActiveIndex) % slides.length;
 
   return (
     <div className="hero-media-carousel" aria-hidden="true">

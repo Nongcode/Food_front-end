@@ -7,7 +7,7 @@ import { JsonLd } from "../../components/JsonLd";
 import { LeadForm } from "../../components/LeadForm";
 import { PackageDetailGallery } from "../../components/PackageDetailGallery";
 import { SiteHeader } from "../../components/SiteHeader";
-import { packageDetailExtras, packageDetailMediaBySlug } from "../../data/travel";
+import { packageDetailExtras, packageDetailMediaBySlug } from "../../data/food";
 import { normalizeLocale } from "@/lib/i18n/config";
 import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
 import { localizePackageDetailContent, normalizePackageDetailContent } from "@/lib/packageDetailContent";
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: PackageDetailPageProps) {
 
   const title = item.name + " | Sơn La Food";
   const description = item.description || item.summary || "";
-  const path = `/goi-du-lich/${item.slug}`;
+  const path = `/combo-dac-san/${item.slug}`;
   const url = absoluteUrl(path);
   const imageUrl = item.image || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
 
@@ -98,7 +98,7 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
   }));
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://timesgreen.net";
-  const canonicalUrl = `${baseUrl}/goi-du-lich/${item.slug}`;
+  const canonicalUrl = `${baseUrl}/combo-dac-san/${item.slug}`;
   const packageImage = item.image || `${baseUrl}/sonla-logo-readable.png`;
   const jsonLd = {
     "@context": "https://schema.org",
@@ -139,7 +139,7 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Sơn La Food", item: baseUrl },
-          { "@type": "ListItem", position: 2, name: "Combo dac san", item: `${baseUrl}/goi-du-lich` },
+          { "@type": "ListItem", position: 2, name: "Combo dac san", item: `${baseUrl}/combo-dac-san` },
           { "@type": "ListItem", position: 3, name: item.name, item: canonicalUrl },
         ],
       },

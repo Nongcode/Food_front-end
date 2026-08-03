@@ -3,12 +3,10 @@ import { PageDisabled } from "./components/PageDisabled";
 import Link from "next/link";
 import { JsonLd } from "./components/JsonLd";
 import { DestinationTabs } from "./components/DestinationTabs";
+import { HomeHero } from "./components/HomeHero";
 import { PackageCarousel } from "./components/PackageCarousel";
 import { PostCarousel } from "./components/PostCarousel";
-import { CustomSelect } from "./components/CustomSelect";
-import { HeroMediaCarousel } from "./components/HeroMediaCarousel";
-import { SiteHeader } from "./components/SiteHeader";
-import { tripStyles } from "./data/travel";
+import { tripStyles } from "./data/food";
 import { isSitePageInactive } from "@/lib/siteSettings";
 import { withLocalePrefix } from "@/lib/i18n/config";
 import { getRequestLocale, getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
@@ -240,7 +238,7 @@ export default async function Home() {
   const translations = await getStaticTranslationMap(locale).catch(() => ({}));
   const t = (namespace: string, key: string, fallback: string) => translateFromMap(translations, namespace, key, fallback);
   const href = (path: string) => withLocalePrefix(path, locale);
-  const packageGroupHref = (group: string) => `${href("/goi-du-lich")}?group=${encodeURIComponent(group)}`;
+  const packageGroupHref = (group: string) => `${href("/combo-dac-san")}?group=${encodeURIComponent(group)}`;
   const { packages: allPackages, packageCollections, homepageBanners, posts } = await getPublicHome(locale);
   const foodHomepageBanners = homepageBanners.filter((banner) => !isLegacyTravelBanner(banner.imageUrl));
   const displayProductCategories = buildDisplayProductCategories(packageCollections, allPackages);
@@ -257,16 +255,16 @@ export default async function Home() {
   });
 
   const fallbackHeroMedia = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=2200&q=85";
+  const fallbackHeroTitle = t("home", "hero_title", "Khám phá hương vị Sơn La ngay tại nhà.");
+  const fallbackHeroSubtitle = t("home", "hero_subtitle", "Sơn La Food tuyển chọn đặc sản Tây Bắc, set quà biếu, gia vị bản địa và nông sản theo mùa để bạn dễ chọn món ngon chuẩn vị.");
   const heroSlides = foodHomepageBanners.length > 0
     ? foodHomepageBanners.map((banner) => ({
       src: banner.imageUrl,
       mediaType: banner.mediaType === "video" || banner.imageUrl.match(/\.(mp4|webm|mov)(\?|$)/i) ? "video" as const : "image" as const,
       title: banner.title,
+      subtitle: banner.subtitle,
     }))
-    : [{ src: fallbackHeroMedia, mediaType: "image" as const, title: "Sơn La Food" }];
-  const homepageBanner = foodHomepageBanners[0];
-  const heroTitle = locale === "vi" && homepageBanner?.title ? homepageBanner.title : t("home", "hero_title", "Khám phá hương vị Sơn La ngay tại nhà.");
-  const heroSubtitle = locale === "vi" && homepageBanner?.subtitle ? homepageBanner.subtitle : t("home", "hero_subtitle", "Sơn La Food tuyển chọn đặc sản Tây Bắc, set quà biếu, gia vị bản địa và nông sản theo mùa để bạn dễ chọn món ngon chuẩn vị.");
+    : [{ src: fallbackHeroMedia, mediaType: "image" as const, title: fallbackHeroTitle, subtitle: fallbackHeroSubtitle }];
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -295,51 +293,29 @@ export default async function Home() {
   return (
     <main>
       <JsonLd data={jsonLd} />
-      <section className="hero-section">
-        <HeroMediaCarousel items={heroSlides} />
-        <div className="hero-overlay" />
-        <SiteHeader variant="hero" />
-
-        <div className="hero-content" id="top">
-          <p className="eyebrow">{t("home", "hero_eyebrow", "Sơn La Food | Đặc sản Tây Bắc")}</p>
-          <h1>{heroTitle}</h1>
-          <p className="hero-copy">{heroSubtitle}</p>
-          <div className="hero-actions">
-            <a className="primary-action" href="#travel-packages">
-              {t("home", "hero_cta_primary_products", "Xem sản phẩm nổi bật")}
-            </a>
-            <Link className="secondary-action" href={href("/goi-du-lich")}>
-              {t("home", "hero_cta_secondary", "Khám phá đặc sản Sơn La")}
-            </Link>
-          </div>
-          <form className="hero-search" id="trip-search" action={href("/goi-du-lich")}>
-            <label>
-              {t("home", "search_destination", "Sản phẩm")}
-              <input suppressHydrationWarning name="destination" placeholder={t("home", "search_destination_placeholder", "Bạn muốn tìm món gì?")} />
-            </label>
-            <div className="hero-search-field">
-              <span className="hero-search-label">{t("home", "search_style", "Nhu cầu")}</span>
-              <CustomSelect
-                name="style"
-                defaultValue=""
-                placeholder={t("home", "search_style_placeholder", "Chọn nhu cầu")}
-                options={[
-                  { value: "", label: t("home", "search_style_placeholder", "Chọn nhu cầu") },
-                  { value: "family", label: t("home", "style_family", "Dùng gia đình") },
-                  { value: "friends", label: t("home", "style_friends", "Quà bạn bè") },
-                  { value: "resort", label: t("home", "style_resort", "Quà biếu") },
-                  { value: "photo", label: t("home", "style_photo", "Món khô") },
-                ]}
-              />
-            </div>
-            <label>
-              {t("home", "search_time", "Thời điểm nhận")}
-              <input suppressHydrationWarning name="date" type="month" />
-            </label>
-            <button suppressHydrationWarning type="submit">{t("home", "search_submit", "Tìm đặc sản")}</button>
-          </form>
-        </div>
-      </section>
+      <HomeHero
+        slides={heroSlides}
+        eyebrow={t("home", "hero_eyebrow", "Sơn La Food | Đặc sản Tây Bắc")}
+        fallbackTitle={fallbackHeroTitle}
+        fallbackSubtitle={fallbackHeroSubtitle}
+        primaryLabel={t("home", "hero_cta_primary_products", "Xem sản phẩm nổi bật")}
+        secondaryLabel={t("home", "hero_cta_secondary", "Khám phá đặc sản Sơn La")}
+        secondaryHref={href("/combo-dac-san")}
+        searchAction={href("/combo-dac-san")}
+        productLabel={t("home", "search_destination", "Sản phẩm")}
+        productPlaceholder={t("home", "search_destination_placeholder", "Bạn muốn tìm món gì?")}
+        styleLabel={t("home", "search_style", "Nhu cầu")}
+        stylePlaceholder={t("home", "search_style_placeholder", "Chọn nhu cầu")}
+        styleOptions={[
+          { value: "", label: t("home", "search_style_placeholder", "Chọn nhu cầu") },
+          { value: "family", label: t("home", "style_family", "Dùng gia đình") },
+          { value: "friends", label: t("home", "style_friends", "Quà bạn bè") },
+          { value: "gift", label: t("home", "style_resort", "Quà biếu") },
+          { value: "dry-food", label: t("home", "style_photo", "Món khô") },
+        ]}
+        timeLabel={t("home", "search_time", "Thời điểm nhận")}
+        submitLabel={t("home", "search_submit", "Tìm đặc sản")}
+      />
 
       <section className="home-assurance-band" aria-label="Cam kết dịch vụ Sơn La Food">
         <div className="home-assurance-inner elementor-widget-wrap elementor-element-populated">
@@ -355,14 +331,14 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="package-showcase" id="travel-packages">
+      <section className="package-showcase" id="product-categories">
         <div className="package-showcase-heading">
           <div>
             <p className="package-showcase-kicker">Chợ đặc sản Sơn La</p>
             <h2>{t("home", "marketplace_heading", "Mua theo danh mục, chọn thêm set gợi ý")}</h2>
             <p className="package-showcase-copy">{t("home", "marketplace_intro", "Ưu tiên cách duyệt như một sàn đặc sản: xem nhóm sản phẩm trước, sau đó chọn từng món hoặc set phối sẵn phù hợp nhu cầu.")}</p>
           </div>
-          <Link href={href("/goi-du-lich")}>{t("home", "marketplace_all", "Khám phá gian hàng")}</Link>
+          <Link href={href("/combo-dac-san")}>{t("home", "marketplace_all", "Khám phá gian hàng")}</Link>
         </div>
 
         <div className="collection-stack">

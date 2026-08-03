@@ -3,7 +3,7 @@ import { publicApiFetch } from "@/lib/publicApi";
 import type { LanguageOption, TranslationMap } from "@/lib/i18n/server";
 import { defaultLanguages } from "@/lib/i18n/defaults";
 import { fallbackCollections, fallbackPackages, type PublicPackage, type PublicPackageCollection } from "@/lib/packages";
-import { posts as fallbackPosts } from "@/app/data/travel";
+import { posts as fallbackPosts } from "@/app/data/food";
 
 export type PublicSiteChromeState = {
   siteChrome: typeof DEFAULT_SITE_CHROME_CONFIG;
@@ -83,10 +83,10 @@ const fallbackLanguages: LanguageOption[] = defaultLanguages.map((language) => (
 const fallbackHomeBanners: PublicHomePayload["homepageBanners"] = [
   {
     id: -1,
-    title: "Sản phẩm đặc sản giao tận nhà.",
+    title: "Sản phẩm đặc sản từ Sơn La đến mâm cơm nhà bạn.",
     subtitle: "Combo quà tặng Tây Bắc, thịt gác bếp, chẩm chéo, chè Shan tuyết và trái cây theo mùa.",
     imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=2200&q=85",
-    linkUrl: "/goi-du-lich",
+    linkUrl: "/combo-dac-san",
     mediaType: "image",
     bannerType: "hero",
     status: "active",
@@ -97,7 +97,7 @@ const fallbackHomeBanners: PublicHomePayload["homepageBanners"] = [
     title: "Set quà Tây Bắc cho từng dịp.",
     subtitle: "Dễ phối theo ngân sách, khẩu vị và số lượng khách cần đặt.",
     imageUrl: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=2200&q=85",
-    linkUrl: "/goi-du-lich",
+    linkUrl: "/combo-dac-san",
     mediaType: "image",
     bannerType: "hero",
     status: "active",

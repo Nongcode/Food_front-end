@@ -6,7 +6,7 @@ import { PackageExplorer } from "../components/PackageExplorer";
 import { isSitePageInactive } from "@/lib/siteSettings";
 import { normalizeLocale } from "@/lib/i18n/config";
 import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
-import { destinations } from "../data/travel";
+import { destinations } from "../data/food";
 import { getPublicPackageCollections, getPublicPackages } from "@/lib/packages";
 import { ensureFullProductCollections } from "@/lib/productCategoryCollections";
 

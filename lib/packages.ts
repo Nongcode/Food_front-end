@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { allPackages, packageCollections as staticCollections } from "@/app/data/travel";
+import { allPackages, packageCollections as staticCollections } from "@/app/data/food";
 import { publicApiFetch } from "@/lib/publicApi";
 
 export type PublicPackage = {

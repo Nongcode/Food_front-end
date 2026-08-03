@@ -5,7 +5,7 @@ import { PageDisabled } from "../components/PageDisabled";
 import { JsonLd } from "../components/JsonLd";
 import { PackageExplorer } from "../components/PackageExplorer";
 import { SiteHeader } from "../components/SiteHeader";
-import { destinations } from "../data/travel";
+import { destinations } from "../data/food";
 import { normalizeLocale } from "@/lib/i18n/config";
 import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
 import { getPublicPackageCollections, getPublicPackages } from "@/lib/packages";
@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export const metadata = publicPageMetadata({
   title: "Sản phẩm đặc sản Sơn La & set quà Tây Bắc | Sơn La Food",
   description: "Khám phá sản phẩm đặc sản Sơn La theo danh mục, hộ bán, quà biếu Tây Bắc, gia vị, trà và nông sản theo mùa.",
-  path: "/goi-du-lich",
+  path: "/combo-dac-san",
 });
 
 
@@ -42,12 +42,12 @@ export default async function PackagesPage({ searchParams }: PackagesPageProps) 
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: t("packages", "marketplace_hero_eyebrow", "Gian hàng đặc sản"),
-    url: absoluteUrl("/goi-du-lich"),
+    url: absoluteUrl("/combo-dac-san"),
     itemListElement: packages.slice(0, 50).map((pkg, index) => ({
       "@type": "ListItem",
       position: index + 1,
       name: pkg.name,
-      url: absoluteUrl(`/goi-du-lich/${pkg.slug}`),
+      url: absoluteUrl(`/combo-dac-san/${pkg.slug}`),
     })),
   };
 

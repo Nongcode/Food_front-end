@@ -8,7 +8,7 @@ import { DEFAULT_SITE_CHROME_CONFIG } from "@/lib/siteChromeShared";
 
 const FALLBACK_FOOTER_LINKS = [
   { id: "home", label: "Trang chủ", url: "/", translationKey: "home", settingKey: "page_home_status" },
-  { id: "packages", label: "Combo đặc sản", url: "/goi-du-lich", translationKey: "packages", settingKey: "page_tours_status" },
+  { id: "packages", label: "Combo đặc sản", url: "/combo-dac-san", translationKey: "packages", settingKey: "page_tours_status" },
   { id: "specialties", label: "Sản phẩm đặc sản", url: "/dac-san", translationKey: "local_specialty", settingKey: "page_local_specialties_status" },
   { id: "stories", label: "Câu chuyện ẩm thực", url: "/tin-tuc", translationKey: "news", settingKey: "page_news_status" },
   { id: "contact", label: "Liên hệ", url: "/lien-he", translationKey: "contact", settingKey: "page_contact_status" },

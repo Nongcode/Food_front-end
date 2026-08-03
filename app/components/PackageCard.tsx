@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { MouseEvent, PointerEvent } from "react";
 import Link from "next/link";
@@ -101,7 +101,7 @@ export function PackageCard({ item }: PackageCardProps) {
 
   return (
     <article className="package-card">
-      <Link className="package-card-link" href={href("/goi-du-lich/" + item.slug)}>
+      <Link className="package-card-link" href={href("/combo-dac-san/" + item.slug)}>
         <div className="package-image" style={{ backgroundImage: "url(" + item.image + ")" }}>
           <span className="package-food-badge">{foodMeta.badge}</span>
           <span className={`status-badge ${statusClass}`}>
@@ -122,6 +122,7 @@ export function PackageCard({ item }: PackageCardProps) {
       <div className="package-footer package-footer-standalone">
         <strong>{item.price}</strong>
         <button
+          suppressHydrationWarning
           className="package-cart-button"
           type="button"
           onClick={handleAddToCart}

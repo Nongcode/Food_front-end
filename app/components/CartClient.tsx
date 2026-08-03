@@ -166,7 +166,7 @@ export function CartClient() {
               <span>{totalQuantity} sản phẩm</span>
               <h2>Sản phẩm đã chọn</h2>
             </div>
-            <Link href={href("/goi-du-lich")}>Mua thêm</Link>
+            <Link href={href("/combo-dac-san")}>Mua thêm</Link>
           </div>
 
           {items.length > 0 ? (
@@ -197,7 +197,7 @@ export function CartClient() {
             <div className="cart-empty">
               <h2>Giỏ hàng đang trống</h2>
               <p>Hãy chọn vài combo đặc sản hoặc sản phẩm tiêu biểu để bắt đầu tạo đơn.</p>
-              <Link href={href("/goi-du-lich")}>Khám phá đặc sản</Link>
+              <Link href={href("/combo-dac-san")}>Khám phá đặc sản</Link>
             </div>
           )}
         </section>

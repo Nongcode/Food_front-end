@@ -105,7 +105,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         if (pathname === "/" && settingsMap.page_home_status === "inactive") {
           isPageDisabled = true;
           disabledPageName = "Trang chủ";
-        } else if (pathname.startsWith("/goi-du-lich") && settingsMap.page_tours_status === "inactive") {
+        } else if (pathname.startsWith("/combo-dac-san") && settingsMap.page_tours_status === "inactive") {
           isPageDisabled = true;
           disabledPageName = "Combo đặc sản";
         } else if (pathname.startsWith("/tin-tuc") && settingsMap.page_news_status === "inactive") {

@@ -257,6 +257,7 @@ export function LocalSpecialtyExplorer({ specialties }: LocalSpecialtyExplorerPr
                   <div className="offer-footer">
                     <strong>{item.priceText || t("localSpecialty", "price_contact", "Liên hệ")}</strong>
                     <button
+                      suppressHydrationWarning
                       type="button"
                       className="offer-cart-button"
                       onClick={() => addSpecialtyToCart(item)}

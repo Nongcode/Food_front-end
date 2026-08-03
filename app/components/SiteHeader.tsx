@@ -345,7 +345,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
           </button>
         </div>
 
-        <form className="mobile-search-form" action={href("/goi-du-lich")}>
+        <form className="mobile-search-form" action={href("/combo-dac-san")}>
           <label>
             <span>{t("home", "search_destination", "Sản phẩm")}</span>
             <input name="destination" placeholder={t("home", "search_destination_placeholder", "Bạn muốn tìm món gì?")} />

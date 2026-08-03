@@ -232,7 +232,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                     <span>{relatedPackage.price}</span>
                   </div>
                   <div className="cta-package-actions">
-                    <Link href={withLocalePrefix("/goi-du-lich/" + relatedPackage.slug, locale)} className="cta-primary">
+                    <Link href={withLocalePrefix("/combo-dac-san/" + relatedPackage.slug, locale)} className="cta-primary">
                       {t("postDetail", "view_package", "Xem chi tiết combo")}
                     </Link>
                     <Link href={withLocalePrefix("/lien-he", locale)} className="cta-secondary">
