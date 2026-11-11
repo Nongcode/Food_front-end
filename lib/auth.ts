@@ -7,7 +7,7 @@ const ADMIN_TOKEN_AUDIENCE = "admin";
  * Lấy secret key từ biến môi trường. Production bắt buộc phải có JWT_SECRET,
  * chỉ môi trường dev mới được dùng key dự phòng.
  */
-function getJwtSecret(): string {
+export function getJwtSecret(): string {
     const secret = process.env.JWT_SECRET;
     if (secret) return secret;
     if (process.env.NODE_ENV === "production") {
