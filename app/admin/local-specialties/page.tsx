@@ -40,7 +40,28 @@ function cloneTranslations(value?: LocalSpecialtyTranslationMap): LocalSpecialty
 const inputClass = "w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/30 text-sm font-semibold text-slate-800 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600";
 
 const statusOptions = ["Hiển thị", "Ẩn"];
-const typeOptions = [{ value: "FOOD", label: "Món ăn" }, { value: "HANDICRAFT", label: "Sản phẩm thủ công" }];
+// Đủ các loại đang có trong DB (FOOD, DRY_FOOD, DRINK, SPICE, FRUIT) + HANDICRAFT
+const typeOptions = [
+  { value: "FOOD", label: "Món ăn" },
+  { value: "DRY_FOOD", label: "Đồ khô" },
+  { value: "DRINK", label: "Đồ uống / trà" },
+  { value: "SPICE", label: "Gia vị" },
+  { value: "FRUIT", label: "Trái cây" },
+  { value: "HANDICRAFT", label: "Sản phẩm thủ công" },
+];
+
+function typeLabel(value: string) {
+  return typeOptions.find((option) => option.value === value)?.label || value || "—";
+}
+
+// Luôn có giá trị hiện tại trong danh sách để form hiển thị đúng và Lưu không tự đổi giá trị
+function typeOptionsWithCurrent(current: string) {
+  return current && !typeOptions.some((option) => option.value === current) ? [{ value: current, label: current }, ...typeOptions] : typeOptions;
+}
+
+function statusOptionsWithCurrent(current: string) {
+  return current && !statusOptions.includes(current) ? [current, ...statusOptions] : statusOptions;
+}
 
 const defaultForm = {
   name: "",
@@ -274,7 +295,7 @@ export default function LocalSpecialtiesAdminPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-semibold">{item.type === "FOOD" ? "Món ăn" : "Đồ thủ công"}</td>
+                    <td className="px-6 py-4 font-semibold">{typeLabel(item.type)}</td>
                     <td className="px-6 py-4 text-slate-500">{item.destinationName || "Chưa đặt"}</td>
                     <td className="px-6 py-4 text-slate-500">{item.priceText || "Không có"}</td>
                     <td className="px-6 py-4">
@@ -389,7 +410,7 @@ function SpecialtyModal({ title, submitLabel, saving, form, updateField, onClose
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Field label="Phân loại">
                   <select value={form.type} onChange={(e) => updateField("type", e.target.value)} className={inputClass}>
-                    {typeOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                    {typeOptionsWithCurrent(form.type).map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                   </select>
                 </Field>
                 <Field label="Điểm đến (Tỉnh/Thành phố)"><input required value={form.destinationName} onChange={(e) => updateField("destinationName", e.target.value)} placeholder="VD: Thanh Hóa" className={inputClass} /></Field>
@@ -408,7 +429,7 @@ function SpecialtyModal({ title, submitLabel, saving, form, updateField, onClose
                 <Field label="Anh dai dien (URL)"><AdminAssetUploadField value={form.imageUrl} onChange={(value) => updateField("imageUrl", value)} placeholder="URL hinh anh hoac upload len Cloudinary" inputClassName={inputClass} disabled={saving} previewAlt={form.name || "Specialty image"} /></Field>
                 <Field label="Trạng thái">
                   <select value={form.status} onChange={(e) => updateField("status", e.target.value)} className={inputClass}>
-                    {statusOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+                    {statusOptionsWithCurrent(form.status).map((option) => <option key={option} value={option}>{option}</option>)}
                   </select>
                 </Field>
               </div>

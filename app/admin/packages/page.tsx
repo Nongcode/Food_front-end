@@ -44,7 +44,13 @@ const emptyPackageTranslations: PackageTranslationMap = {
   "zh-CN": { name: "", destination: "", duration: "", summary: "", description: "", peopleNote: "" },
 };
 
-const statusOptions = ["Sắp ra mắt", "Đang mở bán", "Sắp kín chỗ", "Đã hết chỗ", "Đã đóng", "Tạm ngưng"];
+// "Đang mở" là giá trị cũ còn trong DB (cùng nghĩa "Đang mở bán", xem isOrderablePackage ở lib/orders.ts)
+const statusOptions = ["Sắp ra mắt", "Đang mở", "Đang mở bán", "Sắp kín chỗ", "Đã hết chỗ", "Đã đóng", "Tạm ngưng"];
+
+// Luôn có giá trị hiện tại trong danh sách để form hiển thị đúng và Lưu không tự đổi giá trị
+function optionsWithCurrent(options: string[], current: string) {
+  return current && !options.includes(current) ? [current, ...options] : options;
+}
 
 const defaultForm = {
   name: "",
@@ -87,6 +93,7 @@ function getStatusClass(status: string) {
 
 function statusOptionClass(status: string) {
   switch (status) {
+    case "Đang mở":
     case "Đang mở bán": return "text-emerald-700 hover:bg-emerald-50/50";
     case "Sắp ra mắt": return "text-blue-700 hover:bg-blue-50/50";
     case "Sắp kín chỗ": return "text-amber-700 hover:bg-amber-50/50";
@@ -476,7 +483,7 @@ function PackageModal({ title, submitLabel, saving, form, translations, setTrans
             <Field label="Anh dai dien (URL)"><AdminAssetUploadField value={form.imageUrl} onChange={(value) => updateField("imageUrl", value)} placeholder="URL hinh anh hoac upload len Cloudinary" inputClassName={inputClass} disabled={saving} previewAlt={form.name || "Package image"} /></Field>
             <Field label="Trạng thái gói">
               <select value={form.status} onChange={(e) => updateField("status", e.target.value)} className={inputClass}>
-                {statusOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+                {optionsWithCurrent(statusOptions, form.status).map((option) => <option key={option} value={option}>{option}</option>)}
               </select>
             </Field>
           </div>
