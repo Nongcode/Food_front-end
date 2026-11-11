@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAdmin } from "../../components/admin/AdminContext";
 import AdminAssetUploadField from "../../components/admin/AdminAssetUploadField";
+import { handleAdminImageError } from "@/app/components/admin/adminImageFallback";
 
 type AdminLocalSpecialty = {
   id: number;
@@ -287,7 +288,7 @@ export default function LocalSpecialtiesAdminPage() {
                     <td className="px-6 py-4 min-w-[260px]">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
-                          {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />}
+                          {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" onError={handleAdminImageError} />}
                         </div>
                         <div>
                           <strong className="text-slate-800 font-bold block">{item.name}</strong>

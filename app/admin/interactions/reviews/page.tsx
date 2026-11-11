@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAdmin } from "../../../components/admin/AdminContext";
 import { useRouter } from "next/navigation";
 import AdminAssetUploadField from "../../../components/admin/AdminAssetUploadField";
+import { handleAdminImageError } from "@/app/components/admin/adminImageFallback";
 
 export default function ReviewsAdminPage() {
   const { reviews, isAuthenticated, addReview, updateReview, removeReview } = useAdmin();
@@ -225,6 +226,7 @@ export default function ReviewsAdminPage() {
                       src={r.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"}
                       alt={r.customerName}
                       className="w-10 h-10 rounded-full object-cover border border-slate-100"
+                      onError={handleAdminImageError}
                     />
                     <div>
                       <h4 className="font-bold text-slate-800 text-sm leading-snug">{r.customerName}</h4>

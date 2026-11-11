@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAdmin } from "../../../components/admin/AdminContext";
 import { useRouter } from "next/navigation";
 import { formatFileSize, getAssetTypeFromFile, uploadAssetToCloudinary } from "@/lib/adminCloudinaryUpload";
+import { handleAdminImageError } from "@/app/components/admin/adminImageFallback";
 
 export default function MediaAdminPage() {
   const { mediaFiles, isAuthenticated, addMediaFile, removeMediaFile } = useAdmin();
@@ -270,6 +271,7 @@ export default function MediaAdminPage() {
                     src={file.url}
                     alt={file.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={handleAdminImageError}
                   />
                 ) : (
                   <div className="relative w-full h-full">

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdmin } from "../../components/admin/AdminContext";
 import { uploadAssetToCloudinary } from "@/lib/adminCloudinaryUpload";
+import { handleAdminImageError } from "@/app/components/admin/adminImageFallback";
 
 export type AdminBanner = {
   id: number;
@@ -58,9 +59,7 @@ function MediaPreview({ src, mediaType, title }: { src: string; mediaType: strin
       src={src}
       alt={title}
       className="w-16 h-10 rounded-lg object-cover bg-slate-100 shrink-0"
-      onError={(e) => {
-        (e.currentTarget as HTMLImageElement).style.display = "none";
-      }}
+      onError={handleAdminImageError}
     />
   );
 }

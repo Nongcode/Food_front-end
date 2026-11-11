@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAdmin, AdminPost } from "../../components/admin/AdminContext";
 import { useRouter } from "next/navigation";
 import AdminAssetUploadField from "../../components/admin/AdminAssetUploadField";
+import { handleAdminImageError } from "@/app/components/admin/adminImageFallback";
 
 export default function PostsAdminPage() {
   const { posts, isAuthenticated, addPost, updatePost, removePost, postCategories } = useAdmin();
@@ -261,9 +262,7 @@ export default function PostsAdminPage() {
                             alt={post.title}
                             onClick={() => setViewingPost(post)}
                             className="w-12 h-12 rounded-lg object-cover bg-slate-100 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                            onError={(e) => {
-                              (e.target as HTMLElement).style.display = "none";
-                            }}
+                            onError={handleAdminImageError}
                           />
                         ) : (
                           <div 
