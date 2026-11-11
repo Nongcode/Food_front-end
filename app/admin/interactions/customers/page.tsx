@@ -84,11 +84,11 @@ export default function CustomersAdminPage() {
 
   const handleExportCSV = () => {
     // Generate simple mock CSV contents
-    const headers = "ID,Name,Email,Phone,Total Đơns,Total Spent,Date Added,Status,Notes\n";
+    const headers = "ID,Name,Email,Phone,Has Account,Orders,Date Added,Status,Notes\n";
     const rows = customers
       .map(
         (c) =>
-          `"${c.id}","${c.name}","${c.email}","${c.phone}","${c.totalBookings}","${c.totalSpent}","${c.dateAdded}","${c.status}","${c.notes || ""
+          `"${c.id}","${c.name}","${c.email}","${c.phone}","${c.hasAccount ? "Có" : "Không"}","${c.orderCount}","${c.dateAdded}","${c.status}","${c.notes || ""
           }"`
       )
       .join("\n");
@@ -276,8 +276,8 @@ export default function CustomersAdminPage() {
               <tr className="bg-slate-50 text-xs uppercase font-bold text-slate-500 tracking-wider border-b border-slate-100">
                 <th className="px-6 py-4">Khách hàng</th>
                 <th className="px-6 py-4">Ngày đăng ký</th>
-                <th className="px-6 py-4 text-center">Tích lũy đơn</th>
-                <th className="px-6 py-4 text-right">Tổng chi tiêu</th>
+                <th className="px-6 py-4 text-center">Có tài khoản</th>
+                <th className="px-6 py-4 text-center">Số đơn</th>
                 <th className="px-6 py-4">Ghi chú hỗ trợ</th>
                 <th className="px-6 py-4">Trạng thái</th>
                 <th className="px-6 py-4 text-right">Hành động</th>
@@ -301,12 +301,14 @@ export default function CustomersAdminPage() {
                     <td className="px-6 py-4 text-slate-500 font-mono text-xs">
                       {c.dateAdded}
                     </td>
-                    <td className="px-6 py-4 text-center font-bold text-slate-700">
-                      {c.totalBookings}
+                    <td className="px-6 py-4 text-center">
+                      {c.hasAccount ? (
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-bold border bg-emerald-50 text-emerald-700 border-emerald-100">Có tài khoản</span>
+                      ) : (
+                        <span className="text-xs text-slate-400">Chưa có</span>
+                      )}
                     </td>
-                    <td className="px-6 py-4 text-right font-black text-emerald-800">
-                      {c.totalSpent}
-                    </td>
+                    <td className="px-6 py-4 text-center font-black text-slate-700">{c.orderCount}</td>
                     <td className="px-6 py-4 max-w-xs">
                       <p className="text-xs text-slate-500 italic line-clamp-2">
                         {c.notes || "Không có ghi chú"}

@@ -16,6 +16,8 @@ type AdminLocalSpecialty = {
   description: string;
   imageUrl: string;
   priceText: string;
+  priceValue: number | null;
+  priceUnit: string;
   whereToBuy: string;
   status: string;
   hasDetail?: boolean;
@@ -48,6 +50,8 @@ const defaultForm = {
   description: "",
   imageUrl: "",
   priceText: "",
+  priceValue: "",
+  priceUnit: "",
   whereToBuy: "",
   status: "Hiển thị",
 };
@@ -148,6 +152,8 @@ export default function LocalSpecialtiesAdminPage() {
       description: item.description || "",
       imageUrl: item.imageUrl || "",
       priceText: item.priceText || "",
+      priceValue: item.priceValue != null ? String(item.priceValue) : "",
+      priceUnit: item.priceUnit || "",
       whereToBuy: item.whereToBuy || "",
       status: item.status || "Hiển thị",
     });
@@ -391,6 +397,8 @@ function SpecialtyModal({ title, submitLabel, saving, form, updateField, onClose
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Field label="Giá tham khảo"><input value={form.priceText} onChange={(e) => updateField("priceText", e.target.value)} placeholder="VD: 50.000đ - 100.000đ" className={inputClass} /></Field>
+                <Field label="Giá (VND)"><input type="number" min={0} step={1000} value={form.priceValue} onChange={(e) => updateField("priceValue", e.target.value)} placeholder="VD: 590000 (để trống = giá liên hệ)" className={inputClass} /></Field>
+                <Field label="Đơn vị"><input value={form.priceUnit} onChange={(e) => updateField("priceUnit", e.target.value)} placeholder="VD: hộp, kg, set" className={inputClass} /></Field>
                 <Field label="Nơi mua / Thưởng thức"><input value={form.whereToBuy} onChange={(e) => updateField("whereToBuy", e.target.value)} placeholder="Nhập địa chỉ hoặc tên quán" className={inputClass} /></Field>
               </div>
 

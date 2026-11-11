@@ -31,6 +31,7 @@ export default function SettingsAdminPage() {
   const [pageNewsStatus, setPageNewsStatus] = useState("active");
   const [pageContactStatus, setPageContactStatus] = useState("active");
   const [pageLocalSpecialtiesStatus, setPageLocalSpecialtiesStatus] = useState("active");
+  const [orderPackingFee, setOrderPackingFee] = useState("30000");
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [settingsError, setSettingsError] = useState("");
   const [settingsSuccess, setSettingsSuccess] = useState("");
@@ -92,6 +93,7 @@ export default function SettingsAdminPage() {
           page_news_status: s.page_news_status || "active",
           page_contact_status: s.page_contact_status || "active",
           page_local_specialties_status: s.page_local_specialties_status || "active",
+          order_packing_fee: s.order_packing_fee || "30000",
         };
         setSiteStatus(loadedSettings.site_status);
         setPageHomeStatus(loadedSettings.page_home_status);
@@ -100,6 +102,7 @@ export default function SettingsAdminPage() {
         setPageNewsStatus(loadedSettings.page_news_status);
         setPageContactStatus(loadedSettings.page_contact_status);
         setPageLocalSpecialtiesStatus(loadedSettings.page_local_specialties_status);
+        setOrderPackingFee(loadedSettings.order_packing_fee);
         setSavedSettings(loadedSettings);
         setSettingsLoaded(true);
       } else {
@@ -133,6 +136,7 @@ export default function SettingsAdminPage() {
       page_news_status: pageNewsStatus,
       page_contact_status: pageContactStatus,
       page_local_specialties_status: pageLocalSpecialtiesStatus,
+      order_packing_fee: orderPackingFee.trim(),
     };
     const changedSettings = Object.fromEntries(
       Object.entries(currentSettings).filter(([key, value]) => savedSettings[key] !== value),
@@ -646,6 +650,21 @@ export default function SettingsAdminPage() {
                 </select>
               </div>
             </div>
+          </div>
+
+          {/* Đơn hàng */}
+          <div className="space-y-2">
+            <label htmlFor="order-packing-fee" className="text-xs font-bold text-slate-700 block">Phí đóng gói (VND)</label>
+            <input
+              id="order-packing-fee"
+              type="number"
+              min={0}
+              step={1000}
+              value={orderPackingFee}
+              onChange={(e) => setOrderPackingFee(e.target.value)}
+              className="w-full sm:max-w-xs px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            />
+            <span className="text-[10px] text-slate-400 block font-medium">Cộng vào mỗi đơn từ giỏ hàng. Để 0 nếu miễn phí.</span>
           </div>
 
           {/* Submit Button */}

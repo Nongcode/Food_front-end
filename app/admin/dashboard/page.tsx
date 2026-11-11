@@ -138,7 +138,7 @@ export default function AdminDashboardPage() {
   const scopedCustomers = useMemo(() => {
     if (!activeVendor) return customers;
     const bookingPhones = new Set(scopedBookings.map((booking) => clean(booking.phone)));
-    return customers.filter((customer) => bookingPhones.has(clean(customer.phone)) || matchVendor(clean(customer.notes) + " " + clean(customer.totalSpent), activeVendor));
+    return customers.filter((customer) => bookingPhones.has(clean(customer.phone)) || matchVendor(clean(customer.notes), activeVendor));
   }, [activeVendor, customers, scopedBookings]);
 
   const stats = useMemo(() => {
@@ -256,7 +256,7 @@ export default function AdminDashboardPage() {
         <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[#df4f3c]">{TEXT.customerTitle}</p>
           <div className="mt-5 grid gap-3">
-            {scopedCustomers.slice(0, 4).map((customer: AdminCustomer) => <div key={customer.id} className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4"><div><strong className="block font-black text-slate-950">{clean(customer.name)}</strong><span className="text-xs font-bold text-slate-500">{clean(customer.phone)}</span></div><span className="text-sm font-black text-emerald-800">{clean(customer.totalSpent)}</span></div>)}
+            {scopedCustomers.slice(0, 4).map((customer: AdminCustomer) => <div key={customer.id} className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4"><div><strong className="block font-black text-slate-950">{clean(customer.name)}</strong><span className="text-xs font-bold text-slate-500">{clean(customer.phone)}</span></div><span className="text-sm font-black text-emerald-800">{customer.orderCount} đơn</span></div>)}
           </div>
         </article>
         <article className="rounded-[28px] border border-amber-200 bg-amber-50 p-6 shadow-sm">

@@ -31,8 +31,9 @@ export default function AdminTopbar() {
     if (path.startsWith("/admin/banners/homepage")) return "Banner trang chủ";
     if (path.startsWith("/admin/banners/subpages")) return "Banner trang con";
     if (path.startsWith("/admin/banners/details")) return "Banner trang chi tiết";
-    if (path.startsWith("/admin/bookings/status")) return "Trạng thái xử lý";
-    if (path.startsWith("/admin/bookings")) return "Quản lý đơn đặt hàng";
+    if (path.startsWith("/admin/bookings")) return "Yêu cầu cũ (lưu trữ)";
+    if (path.startsWith("/admin/orders")) return "Đơn hàng";
+    if (path.startsWith("/admin/inquiries")) return "Yêu cầu tư vấn";
     if (path.startsWith("/admin/multilingual/languages")) return "Quản lý ngôn ngữ";
     if (path.startsWith("/admin/multilingual/translations")) return "Từ khóa & bản dịch";
     if (path.startsWith("/admin/interactions/reviews")) return "Đánh giá & phản hồi";
@@ -51,7 +52,9 @@ export default function AdminTopbar() {
       posts: "Bài viết",
       packages: "Combo đặc sản",
       banners: "Banner",
-      bookings: "Đơn đặt hàng",
+      bookings: "Yêu cầu cũ",
+      orders: "Đơn hàng",
+      inquiries: "Yêu cầu tư vấn",
       multilingual: "Đa ngôn ngữ",
       interactions: "Tương tác khách hàng",
       system: "Hệ thống",

@@ -142,8 +142,8 @@ export type AdminCustomer = {
   name: string;
   email: string;
   phone: string;
-  totalBookings: number;
-  totalSpent: string;
+  hasAccount: boolean;
+  orderCount: number;
   dateAdded: string;
   notes?: string;
   status: "Hoạt động" | "Khóa";
@@ -252,7 +252,7 @@ type AdminContextValue = {
 
 
 
-  addCustomer: (c: Omit<AdminCustomer, "id" | "dateAdded" | "totalBookings" | "totalSpent">) => void;
+  addCustomer: (c: Omit<AdminCustomer, "id" | "dateAdded" | "hasAccount" | "orderCount">) => void;
   updateCustomer: (id: number, updated: Partial<AdminCustomer>) => void;
   removeCustomer: (id: number) => void;
 
@@ -361,8 +361,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   ];
 
   const initialCustomers: AdminCustomer[] = [
-    { id: 1, name: "Nguyễn Mai Anh", email: "maianh@example.com", phone: "0912345678", totalBookings: 1, totalSpent: "590.000đ", dateAdded: "2026-07-20", status: "Hoạt động", notes: "Thích combo có thịt trâu và gia vị." },
-    { id: 2, name: "Trần Đức Huy", email: "huy.tran@example.com", phone: "0987654321", totalBookings: 1, totalSpent: "890.000đ", dateAdded: "2026-07-22", status: "Hoạt động", notes: "Khách mua quà doanh nghiệp." },
+    { id: 1, name: "Nguyễn Mai Anh", email: "maianh@example.com", phone: "0912345678", hasAccount: false, orderCount: 0, dateAdded: "2026-07-20", status: "Hoạt động", notes: "Thích combo có thịt trâu và gia vị." },
+    { id: 2, name: "Trần Đức Huy", email: "huy.tran@example.com", phone: "0987654321", hasAccount: false, orderCount: 0, dateAdded: "2026-07-22", status: "Hoạt động", notes: "Khách mua quà doanh nghiệp." },
   ];
   const initialMediaFiles: MediaFile[] = [
     { id: 1, name: "son-la-food-table.jpg", url: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80", type: "image", size: "485 KB", dimensions: "1200x800", uploadedAt: "2026-07-20 14:30" },
@@ -948,7 +948,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
 
   // Customer CRUD
-  async function addCustomer(c: Omit<AdminCustomer, "id" | "dateAdded" | "totalBookings" | "totalSpent">) {
+  async function addCustomer(c: Omit<AdminCustomer, "id" | "dateAdded" | "hasAccount" | "orderCount">) {
     try {
       const res = await fetch("/api/admin/customers", {
         method: "POST",

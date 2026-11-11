@@ -28,14 +28,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (body.name !== undefined) updateData.name = body.name;
     if (body.email !== undefined) updateData.email = body.email;
     if (body.phone !== undefined) updateData.phone = body.phone;
-    if (body.totalBookings !== undefined) updateData.totalBookings = body.totalBookings;
-    if (body.totalSpent !== undefined) updateData.totalSpent = body.totalSpent;
     if (body.notes !== undefined) updateData.notes = body.notes;
     if (body.status !== undefined) updateData.status = body.status;
 
     const customer = await prisma.customer.update({
       where: { id },
       data: updateData,
+      include: { _count: { select: { orders: true } } },
     });
 
     const formattedCustomer = {
@@ -43,8 +42,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       name: customer.name,
       email: customer.email,
       phone: customer.phone,
-      totalBookings: customer.totalBookings,
-      totalSpent: customer.totalSpent,
+      hasAccount: customer.passwordHash !== null,
+      orderCount: customer._count.orders,
       notes: customer.notes || undefined,
       status: customer.status,
       dateAdded: customer.createdAt.toISOString().split("T")[0],

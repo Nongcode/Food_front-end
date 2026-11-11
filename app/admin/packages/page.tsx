@@ -21,6 +21,8 @@ type AdminPackage = {
   offer: AdminOffer | null;
   duration: string;
   price: string;
+  priceValue: number | null;
+  priceUnit: string;
   summary: string;
   description: string;
   minPeople: number | null;
@@ -53,6 +55,8 @@ const defaultForm = {
   offerValidUntil: "",
   duration: "3 ngày 2 đêm",
   price: "",
+  priceValue: "",
+  priceUnit: "",
   summary: "",
   description: "",
   minPeople: "",
@@ -189,6 +193,8 @@ export default function PackagesAdminPage() {
       offerValidUntil: validUntilFormatted,
       duration: pkg.duration || "",
       price: pkg.price || "",
+      priceValue: pkg.priceValue != null ? String(pkg.priceValue) : "",
+      priceUnit: pkg.priceUnit || "",
       summary: pkg.summary || "",
       description: pkg.description || "",
       minPeople: pkg.minPeople ? String(pkg.minPeople) : "",
@@ -451,6 +457,8 @@ function PackageModal({ title, submitLabel, saving, form, translations, setTrans
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field label="Thời lượng"><input value={form.duration} onChange={(e) => updateField("duration", e.target.value)} placeholder="Ví dụ: 3 ngày 2 đêm" className={inputClass} /></Field>
             <Field label="Giá combo"><input value={form.price} onChange={(e) => updateField("price", e.target.value)} placeholder="Ví dụ: Từ 6.200.000đ" className={inputClass} /></Field>
+            <Field label="Giá (VND)"><input type="number" min={0} step={1000} value={form.priceValue} onChange={(e) => updateField("priceValue", e.target.value)} placeholder="VD: 590000 (để trống = giá liên hệ)" className={inputClass} /></Field>
+            <Field label="Đơn vị"><input value={form.priceUnit} onChange={(e) => updateField("priceUnit", e.target.value)} placeholder="VD: hộp, kg, set" className={inputClass} /></Field>
           </div>
 
           <Field label="Mô tả card"><textarea value={form.summary} onChange={(e) => updateField("summary", e.target.value)} placeholder="Mô tả ngắn hiển thị trên thẻ (card)..." rows={2} className={`${inputClass} resize-none`} /></Field>

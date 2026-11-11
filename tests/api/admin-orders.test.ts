@@ -124,7 +124,7 @@ test("đổi trạng thái yêu cầu tư vấn", async () => {
   assert.ok((await readJson(list)).data.some((item: any) => item.id === inquiry.id));
 });
 
-test("danh sách khách có hasAccount, orderCount, không lộ passwordHash", async () => {
+test("danh sách khách có hasAccount, orderCount, không lộ passwordHash, bỏ totalBookings/totalSpent", async () => {
   const res = await listCustomers(jsonRequest("/api/admin/customers", { cookie: adminCookie }));
   const { customers } = await readJson(res);
   const mine = customers.find((item: any) => item.email.startsWith("adm") && item.email.endsWith("@sonlafood.local"));
@@ -132,6 +132,8 @@ test("danh sách khách có hasAccount, orderCount, không lộ passwordHash", a
   assert.equal(mine.hasAccount, true);
   assert.ok(mine.orderCount >= 1);
   assert.equal("passwordHash" in mine, false);
+  assert.equal("totalBookings" in mine, false);
+  assert.equal("totalSpent" in mine, false);
 });
 
 test("cấu hình order_packing_fee chỉ nhận số nguyên ≥ 0", async () => {

@@ -27,8 +27,6 @@ export async function GET(request: NextRequest) {
       name: customer.name,
       email: customer.email,
       phone: customer.phone,
-      totalBookings: customer.totalBookings,
-      totalSpent: customer.totalSpent,
       hasAccount: customer.passwordHash !== null,
       orderCount: customer._count.orders,
       notes: customer.notes || undefined,
@@ -51,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, email, phone, notes, status, totalBookings, totalSpent } = body;
+    const { name, email, phone, notes, status } = body;
 
     if (!name || !email || !phone) {
       return NextResponse.json({ error: "Thiếu thông tin bắt buộc." }, { status: 400 });
@@ -62,8 +60,6 @@ export async function POST(request: NextRequest) {
         name,
         email,
         phone,
-        totalBookings: totalBookings || 0,
-        totalSpent: totalSpent || "0",
         notes: notes || null,
         status: status || "Hoạt động",
       },
@@ -74,8 +70,8 @@ export async function POST(request: NextRequest) {
       name: customer.name,
       email: customer.email,
       phone: customer.phone,
-      totalBookings: customer.totalBookings,
-      totalSpent: customer.totalSpent,
+      hasAccount: false,
+      orderCount: 0,
       notes: customer.notes || undefined,
       status: customer.status,
       dateAdded: customer.createdAt.toISOString().split("T")[0],
