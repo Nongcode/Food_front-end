@@ -11,7 +11,9 @@
     "db:generate": "prisma generate",
     "db:sync-content": "tsx scripts/sync-public-content.ts",
     "postinstall": "prisma generate",
-    "db:seed-marketplace": "tsx scripts/seed-marketplace-demo.ts"
+    "db:seed-marketplace": "tsx scripts/seed-marketplace-demo.ts",
+    "test:unit": "tsx --test tests/unit/*.test.ts",
+    "test:api": "tsx --test --test-concurrency=1 tests/api/*.test.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
