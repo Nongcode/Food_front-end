@@ -311,7 +311,7 @@ export default function AdminSidebar() {
       {/* Sidebar Footer branding */}
       <div className="mt-auto border-t border-white/10 pt-4 px-2 text-center">
         <p className="text-[11px] font-bold text-emerald-200/40 tracking-wider font-mono">
-          VIETVISTA PORTAL v1.0
+          SƠN LA FOOD ADMIN
         </p>
       </div>
     </div>

@@ -88,3 +88,6 @@ export type AdminInquiry = {
   createdAt: string;
   customer: { id: number; name: string; email: string; phone: string };
 };
+
+/** Ô "Tìm kiếm nhanh" ở thanh trên phát sự kiện này khi admin đang đứng sẵn ở trang đơn hàng. */
+export const ADMIN_ORDER_SEARCH_EVENT = "admin-order-quick-search";

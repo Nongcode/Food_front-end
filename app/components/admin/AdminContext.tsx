@@ -711,7 +711,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         id: Date.now(),
         name: p.name,
         destination: p.destination,
-        duration: p.duration ?? "3 ngày 2 đêm",
+        duration: p.duration ?? "",
         price: p.price ?? "Liên hệ",
         status: p.status ?? "Đang mở",
       },

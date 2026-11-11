@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAdmin } from "./AdminContext";
+import { ADMIN_ORDER_SEARCH_EVENT } from "./adminOrderUi";
 
 const notificationsSeed = [
   { id: 1, text: "Yêu cầu đơn đặt hàng mới cho gói Sơn La", time: "5 phút trước" },
@@ -17,6 +18,7 @@ export default function AdminTopbar() {
   const [notifications] = useState(notificationsSeed);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [quickSearch, setQuickSearch] = useState("");
 
   const getPageTitle = (path: string) => {
     if (path.startsWith("/admin/dashboard")) return "Tổng quan hệ thống";
@@ -134,15 +136,29 @@ export default function AdminTopbar() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative w-36 sm:w-56 md:w-60 lg:w-72 transition-all duration-300 group">
+            <form
+              role="search"
+              className="relative w-36 sm:w-56 md:w-60 lg:w-72 transition-all duration-300 group"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const q = quickSearch.trim();
+                // Tìm nhanh theo mã đơn / tên / SĐT / email khách ở trang Đơn hàng
+                router.push(q ? `/admin/orders?q=${encodeURIComponent(q)}` : "/admin/orders");
+                if (pathname === "/admin/orders") window.dispatchEvent(new CustomEvent(ADMIN_ORDER_SEARCH_EVENT, { detail: q }));
+              }}
+            >
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-600 transition-colors">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
               </span>
               <input
-                placeholder="Tìm kiếm nhanh..."
+                type="search"
+                value={quickSearch}
+                onChange={(event) => setQuickSearch(event.target.value)}
+                aria-label="Tìm nhanh đơn hàng"
+                placeholder="Tìm đơn: mã, tên, SĐT..."
                 className="w-full pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50/50 py-2 text-xs focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-600 focus:bg-white transition-all placeholder-slate-400 font-bold text-slate-700 shadow-sm shadow-slate-100/50"
               />
-            </div>
+            </form>
 
             <div className="relative">
               <button

@@ -59,7 +59,7 @@ const defaultForm = {
   offerTitle: "",
   offerDescription: "",
   offerValidUntil: "",
-  duration: "3 ngày 2 đêm",
+  duration: "1 - 2 ngày",
   price: "",
   priceValue: "",
   priceUnit: "",
@@ -431,7 +431,7 @@ function PackageModal({ title, submitLabel, saving, form, translations, setTrans
         <form onSubmit={onSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field label="Tên combo đặc sản"><input required value={form.name} onChange={(e) => updateField("name", e.target.value)} placeholder="Ví dụ: Set quà Mộc Châu cao cấp" className={inputClass} /></Field>
-            <Field label="Đường dẫn (Slug)"><input value={form.slug} onChange={(e) => updateField("slug", e.target.value)} placeholder="ky-nghi-phu-quoc (để trống tự tạo)" className={inputClass} /></Field>
+            <Field label="Đường dẫn (Slug)"><input value={form.slug} onChange={(e) => updateField("slug", e.target.value)} placeholder="combo-qua-bieu-son-la (để trống tự tạo)" className={inputClass} /></Field>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -462,8 +462,8 @@ function PackageModal({ title, submitLabel, saving, form, translations, setTrans
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Field label="Thời lượng"><input value={form.duration} onChange={(e) => updateField("duration", e.target.value)} placeholder="Ví dụ: 3 ngày 2 đêm" className={inputClass} /></Field>
-            <Field label="Giá combo"><input value={form.price} onChange={(e) => updateField("price", e.target.value)} placeholder="Ví dụ: Từ 6.200.000đ" className={inputClass} /></Field>
+            <Field label="Thời gian giao"><input value={form.duration} onChange={(e) => updateField("duration", e.target.value)} placeholder="Ví dụ: 1 - 2 ngày, hoặc Đặt trước / theo mùa" className={inputClass} /></Field>
+            <Field label="Giá combo"><input value={form.price} onChange={(e) => updateField("price", e.target.value)} placeholder="Ví dụ: Từ 590.000đ" className={inputClass} /></Field>
             <Field label="Giá (VND)"><input type="number" min={0} step={1000} value={form.priceValue} onChange={(e) => updateField("priceValue", e.target.value)} placeholder="VD: 590000 (để trống = giá liên hệ)" className={inputClass} /></Field>
             <Field label="Đơn vị"><input value={form.priceUnit} onChange={(e) => updateField("priceUnit", e.target.value)} placeholder="VD: hộp, kg, set" className={inputClass} /></Field>
           </div>
@@ -476,11 +476,11 @@ function PackageModal({ title, submitLabel, saving, form, translations, setTrans
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Field label="Số người tối thiểu"><input type="number" min="1" value={form.minPeople} onChange={(e) => updateField("minPeople", e.target.value)} placeholder="VD: 2" className={inputClass} /></Field>
             <Field label="Số người tối đa"><input type="number" min="1" value={form.maxPeople} onChange={(e) => updateField("maxPeople", e.target.value)} placeholder="VD: 15" className={inputClass} /></Field>
-            <Field label="Ghi chú số người"><input value={form.peopleNote} onChange={(e) => updateField("peopleNote", e.target.value)} placeholder="VD: Nhóm nhỏ 4-8 khách" className={inputClass} /></Field>
+            <Field label="Ghi chú số người"><input value={form.peopleNote} onChange={(e) => updateField("peopleNote", e.target.value)} placeholder="VD: Đủ dùng cho 4 - 6 người" className={inputClass} /></Field>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Field label="Anh dai dien (URL)"><AdminAssetUploadField value={form.imageUrl} onChange={(value) => updateField("imageUrl", value)} placeholder="URL hinh anh hoac upload len Cloudinary" inputClassName={inputClass} disabled={saving} previewAlt={form.name || "Package image"} /></Field>
+            <Field label="Ảnh đại diện (URL)"><AdminAssetUploadField value={form.imageUrl} onChange={(value) => updateField("imageUrl", value)} placeholder="Dán URL ảnh hoặc tải ảnh lên Cloudinary" inputClassName={inputClass} disabled={saving} previewAlt={form.name || "Package image"} /></Field>
             <Field label="Trạng thái gói">
               <select value={form.status} onChange={(e) => updateField("status", e.target.value)} className={inputClass}>
                 {optionsWithCurrent(statusOptions, form.status).map((option) => <option key={option} value={option}>{option}</option>)}

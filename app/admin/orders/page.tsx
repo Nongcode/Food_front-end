@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { useAdmin } from "../../components/admin/AdminContext";
 import { ORDER_STATUSES, ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orderStatus";
-import { adminApi, dateTimeFormatter, formatVnd, ORDER_STATUS_CLASS, type AdminOrder } from "../../components/admin/adminOrderUi";
+import { ADMIN_ORDER_SEARCH_EVENT, adminApi, dateTimeFormatter, formatVnd, ORDER_STATUS_CLASS, type AdminOrder } from "../../components/admin/adminOrderUi";
 
 type OrderPage = { items: AdminOrder[]; total: number; page: number; pageSize: number };
 
@@ -15,12 +15,17 @@ function readInitialStatus(): OrderStatus | "" {
   return (ORDER_STATUSES as readonly string[]).includes(value) ? (value as OrderStatus) : "";
 }
 
+function readInitialQuery() {
+  if (typeof window === "undefined") return "";
+  return (new URLSearchParams(window.location.search).get("q") || "").trim();
+}
+
 export default function AdminOrdersPage() {
   const { isAuthenticated } = useAdmin();
   const router = useRouter();
   const [status, setStatus] = useState<OrderStatus | "">(readInitialStatus);
-  const [searchInput, setSearchInput] = useState("");
-  const [query, setQuery] = useState("");
+  const [searchInput, setSearchInput] = useState(readInitialQuery);
+  const [query, setQuery] = useState(readInitialQuery);
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<{ key: string; data: OrderPage | null; error: string } | null>(null);
 
@@ -29,6 +34,17 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     if (!isAuthenticated) router.push("/admin/login");
   }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    function handleQuickSearch(event: Event) {
+      const next = String((event as CustomEvent<string>).detail || "").trim();
+      setSearchInput(next);
+      setQuery(next);
+      setPage(1);
+    }
+    window.addEventListener(ADMIN_ORDER_SEARCH_EVENT, handleQuickSearch);
+    return () => window.removeEventListener(ADMIN_ORDER_SEARCH_EVENT, handleQuickSearch);
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;

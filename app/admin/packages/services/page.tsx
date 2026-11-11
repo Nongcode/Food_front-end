@@ -103,7 +103,7 @@ export default function PackageServicesPage() {
               <tr className="bg-slate-50 text-xs uppercase font-bold text-slate-500 tracking-wider border-b border-slate-100">
                 <th className="px-6 py-4">Combo đặc sản</th>
                 <th className="px-6 py-4">Vùng đặc sản</th>
-                <th className="px-6 py-4">Thời lượng</th>
+                <th className="px-6 py-4">Thời gian giao</th>
                 <th className="px-6 py-4">Trạng thái chi tiết</th>
                 <th className="px-6 py-4 text-right">Thao tác</th>
               </tr>
