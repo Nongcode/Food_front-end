@@ -122,6 +122,8 @@ export async function getSpecialtiesPayload(locale: string) {
       description: localized.description || "",
       imageUrl: localized.imageUrl || "",
       priceText: localized.priceText || "",
+      priceValue: item.price ?? null,
+      priceUnit: item.priceUnit ?? null,
       whereToBuy: localized.whereToBuy || "",
       destinationName: item.destination?.name || "",
     };
@@ -138,7 +140,7 @@ export async function getSpecialtyDetailPayload(slug: string, locale: string) {
   const allSpecialtiesRaw = await prisma.localSpecialty.findMany({ where: { status: { in: VISIBLE_STATUSES } } });
   const specialtyNames = await Promise.all(allSpecialtiesRaw.map(async (specialty) => (await localizeContent("local_specialty", specialty, locale)).name));
   return {
-    specialty: item,
+    specialty: { ...item, priceValue: itemRaw.price ?? null, priceUnit: itemRaw.priceUnit ?? null },
     detail: {
       bannerImageUrl: detailLocalized?.bannerImageUrl || "",
       overview: detailLocalized?.overview || "",

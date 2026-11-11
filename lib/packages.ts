@@ -13,6 +13,8 @@ export type PublicPackage = {
   rawDestination: string;
   duration: string;
   price: string;
+  priceValue: number | null;
+  priceUnit: string | null;
   summary: string;
   description: string;
   minPeople?: number | null;
@@ -114,6 +116,8 @@ function fromStaticPackage(item: any, locale = "vi"): PublicPackage {
     rawDestination: normalizeLegacyText(item.destination),
     duration: normalizeLegacyText(item.duration),
     price: formatPriceText(item.price || "", locale),
+    priceValue: null,
+    priceUnit: null,
     summary: normalizeLegacyText(translated?.summary || item.summary),
     description: normalizeLegacyText(translated?.summary || item.description || item.summary),
     minPeople: null,
@@ -133,7 +137,9 @@ function fromDbPackage(item: any, locale = "vi"): PublicPackage {
     destination: normalizeLegacyText(typeof item.destination === "string" ? item.destination : item.destination?.name || ""),
     rawDestination: normalizeLegacyText(item.rawDestination || (typeof item.destination === "string" ? item.destination : item.destination?.name || "")),
     duration: normalizeLegacyText(item.duration || ""),
-    price: formatPriceText(item.priceText || item.price || "", locale),
+    price: formatPriceText(item.priceText || "", locale),
+    priceValue: typeof item.price === "number" ? item.price : null,
+    priceUnit: item.priceUnit || null,
     summary: normalizeLegacyText(item.summary || ""),
     description: normalizeLegacyText(item.description || item.summary || ""),
     minPeople: item.minPeople ?? null,
