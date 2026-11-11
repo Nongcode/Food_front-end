@@ -473,6 +473,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // Kiá»ƒm tra phiÃªn lÃ m viá»‡c ngay khi load trang
   useEffect(() => {
     async function checkSession() {
+      // Trang đăng nhập: proxy đã chuyển admin có phiên sang dashboard nên không gọi /api/admin/me (tránh lỗi 401 trên console)
+      if (typeof window !== "undefined" && window.location.pathname.replace(/\/$/, "").endsWith("/admin/login")) {
+        setIsAuthenticated(false);
+        setCurrentAdmin(null);
+        window.localStorage.removeItem(authStorageKey);
+        setAuthReady(true);
+        return;
+      }
       try {
         const res = await fetch("/api/admin/me");
         if (res.ok) {
