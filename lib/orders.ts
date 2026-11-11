@@ -109,21 +109,53 @@ export function readReceiver(body: Record<string, unknown>, partial = false) {
 
 type ProductLine = { itemType: OrderItemType; itemId: number; slug: string; name: string; image: string | null; unitPrice: number | null; unit: string | null; quantity: number };
 
-// Tra sản phẩm theo slug; giá luôn lấy từ DB
-async function resolveLines(items: OrderInputItem[]): Promise<ProductLine[]> {
+type ProductRecord = { id: number; slug: string; name: string; status: string; imageUrl: string | null; price: number | null; priceUnit: string | null };
+
+// Tra sản phẩm theo slug (giá luôn lấy từ DB); orderable = còn bán
+async function findProducts<T extends { itemType: OrderItemType; slug: string }>(items: T[]) {
   const packageSlugs = items.filter((item) => item.itemType === "package").map((item) => item.slug);
   const specialtySlugs = items.filter((item) => item.itemType === "specialty").map((item) => item.slug);
   const [packages, specialties] = await Promise.all([
     packageSlugs.length ? prisma.package.findMany({ where: { slug: { in: packageSlugs } } }) : [],
     specialtySlugs.length ? prisma.localSpecialty.findMany({ where: { slug: { in: specialtySlugs } } }) : [],
   ]);
-
   return items.map((item) => {
-    const product =
+    const product: ProductRecord | undefined =
       item.itemType === "package"
         ? packages.find((pkg) => pkg.slug === item.slug)
         : specialties.find((specialty) => specialty.slug === item.slug);
-    const orderable = product && (item.itemType === "package" ? isOrderablePackage(product.status) : VISIBLE_STATUSES.includes(product.status));
+    const orderable = Boolean(product && (item.itemType === "package" ? isOrderablePackage(product.status) : VISIBLE_STATUSES.includes(product.status)));
+    return { item, product, orderable };
+  });
+}
+
+export type CartQuote = { itemType: OrderItemType; slug: string; name: string | null; unitPrice: number | null; unit: string | null; available: boolean };
+
+// Giá hiện tại cho các món trong giỏ (giỏ FE lưu ở localStorage có thể cũ hoặc bị sửa)
+export async function quoteCartItems(raw: unknown): Promise<CartQuote[]> {
+  if (!Array.isArray(raw) || raw.length === 0) throw new OrderInputError("Giỏ hàng đang trống.");
+  if (raw.length > MAX_ORDER_LINES) throw new OrderInputError(`Mỗi đơn tối đa ${MAX_ORDER_LINES} sản phẩm.`);
+  const items = raw.map((entry) => {
+    const item = (entry ?? {}) as Record<string, unknown>;
+    const slug = typeof item.slug === "string" ? item.slug.trim() : "";
+    if (item.itemType !== "package" && item.itemType !== "specialty") throw new OrderInputError("Loại sản phẩm không hợp lệ.");
+    if (!slug) throw new OrderInputError("Thiếu mã sản phẩm.");
+    return { itemType: item.itemType as OrderItemType, slug };
+  });
+  const found = await findProducts(items);
+  return found.map(({ item, product, orderable }) => ({
+    itemType: item.itemType,
+    slug: item.slug,
+    name: orderable && product ? product.name : null,
+    unitPrice: orderable && product ? product.price ?? null : null,
+    unit: orderable && product ? product.priceUnit ?? null : null,
+    available: orderable,
+  }));
+}
+
+async function resolveLines(items: OrderInputItem[]): Promise<ProductLine[]> {
+  const found = await findProducts(items);
+  return found.map(({ item, product, orderable }) => {
     if (!product || !orderable) throw new OrderInputError(`Sản phẩm không còn bán: ${product?.name || item.slug}`);
     return {
       itemType: item.itemType,
