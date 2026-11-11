@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAdmin } from "./AdminContext";
 import { ADMIN_ORDER_SEARCH_EVENT } from "./adminOrderUi";
+import { ADMIN_BREADCRUMB_LABEL_EVENT, buildAdminBreadcrumb, type AdminBreadcrumbOverride } from "./adminBreadcrumb";
 
 const notificationsSeed = [
   { id: 1, text: "Yêu cầu đơn đặt hàng mới cho gói Sơn La", time: "5 phút trước" },
@@ -19,6 +20,7 @@ export default function AdminTopbar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [quickSearch, setQuickSearch] = useState("");
+  const [breadcrumbOverride, setBreadcrumbOverride] = useState<AdminBreadcrumbOverride | null>(null);
 
   const getPageTitle = (path: string) => {
     if (path.startsWith("/admin/dashboard")) return "Tổng quan hệ thống";
@@ -48,41 +50,12 @@ export default function AdminTopbar() {
     return "Quản trị Sơn La Food";
   };
 
-  const getBreadcrumb = (path: string) => {
-    const labels: Record<string, string> = {
-      admin: "Sơn La Food",
-      posts: "Bài viết",
-      packages: "Combo đặc sản",
-      banners: "Banner",
-      bookings: "Yêu cầu cũ",
-      orders: "Đơn hàng",
-      inquiries: "Yêu cầu tư vấn",
-      multilingual: "Đa ngôn ngữ",
-      interactions: "Tương tác khách hàng",
-      system: "Hệ thống",
-      categories: "Danh mục",
-      offers: "Ưu đãi",
-      services: "Chi tiết gói",
-      detail: "Chi tiết",
-      homepage: "Trang chủ",
-      subpages: "Trang con",
-      details: "Trang chi tiết",
-      languages: "Ngôn ngữ",
-      translations: "Bản dịch",
-      reviews: "Đánh giá",
-      contacts: "Liên hệ",
-      customers: "Khách hàng",
-      media: "Media",
-      seo: "SEO",
-      navigation: "Header & Footer",
-      settings: "Cài đặt",
-      dashboard: "Dashboard",
-      control: "Control",
-      status: "Trạng thái",
-    };
 
-    return path.split("/").filter(Boolean).map((part) => labels[part] || part.charAt(0).toUpperCase() + part.slice(1));
-  };
+  useEffect(() => {
+    const handleLabel = (event: Event) => setBreadcrumbOverride((event as CustomEvent<AdminBreadcrumbOverride | null>).detail ?? null);
+    window.addEventListener(ADMIN_BREADCRUMB_LABEL_EVENT, handleLabel);
+    return () => window.removeEventListener(ADMIN_BREADCRUMB_LABEL_EVENT, handleLabel);
+  }, []);
 
   useEffect(() => {
     const handleCloseAll = () => {
@@ -120,7 +93,7 @@ export default function AdminTopbar() {
             </button>
             <div className="flex flex-col justify-center">
               <div className="flex items-center gap-1 text-[10px] sm:text-[12px] font-bold text-slate-400 uppercase tracking-wider leading-none">
-                {getBreadcrumb(pathname).map((label, idx, arr) => (
+                {buildAdminBreadcrumb(pathname, breadcrumbOverride).map((label, idx, arr) => (
                   <React.Fragment key={`${label}-${idx}`}>
                     <span>{label}</span>
                     {idx < arr.length - 1 && (

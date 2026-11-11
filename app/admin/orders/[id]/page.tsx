@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useAdmin } from "../../../components/admin/AdminContext";
 import { NEXT_ORDER_STATUS, ORDER_STATUS_LABELS, type OrderStatus } from "@/lib/orderStatus";
 import { adminApi, dateTimeFormatter, formatVnd, ORDER_STATUS_CLASS, type AdminOrder } from "../../../components/admin/adminOrderUi";
+import { ADMIN_BREADCRUMB_LABEL_EVENT } from "../../../components/admin/adminBreadcrumb";
 
 const ACTION_LABELS: Record<OrderStatus, string> = {
   pending: "Chờ xác nhận",
@@ -44,6 +45,16 @@ export default function AdminOrderDetailPage() {
       active = false;
     };
   }, [isAuthenticated, id]);
+
+  const orderCode = order?.code;
+  useEffect(() => {
+    if (!orderCode) return;
+    // Breadcrumb trên topbar hiện mã đơn (SLF-...) thay vì id
+    window.dispatchEvent(new CustomEvent(ADMIN_BREADCRUMB_LABEL_EVENT, { detail: { path: `/admin/orders/${id}`, label: orderCode } }));
+    return () => {
+      window.dispatchEvent(new CustomEvent(ADMIN_BREADCRUMB_LABEL_EVENT, { detail: null }));
+    };
+  }, [orderCode, id]);
 
   if (!isAuthenticated) return null;
 
