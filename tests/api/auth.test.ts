@@ -112,3 +112,26 @@ test("logout xoá cookie", async () => {
   assert.ok(cookie);
   assert.equal(cookie.value, "");
 });
+
+test("ngày sinh: đăng ký / sửa hồ sơ với ngày tương lai hoặc sai định dạng → 400; ngày hợp lệ được lưu", async () => {
+  const tomorrow = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const future = await register(jsonRequest("/api/auth/register", { body: registerBody(uniqueEmail(), { birthday: tomorrow }) }));
+  assert.equal(future.status, 400);
+  const badFormat = await register(jsonRequest("/api/auth/register", { body: registerBody(uniqueEmail(), { birthday: "2001-02-30" }) }));
+  assert.equal(badFormat.status, 400);
+
+  const email = uniqueEmail();
+  const reg = await register(jsonRequest("/api/auth/register", { body: registerBody(email, { birthday: "1995-06-15" }) }));
+  assert.equal(reg.status, 201);
+  assert.equal((await readJson(reg)).data.birthday, "1995-06-15");
+  const cookie = cookieFrom(reg, "customer_token");
+
+  const patchFuture = await patchMe(jsonRequest("/api/auth/me", { method: "PATCH", cookie, body: { birthday: tomorrow } }));
+  assert.equal(patchFuture.status, 400);
+  const patchOk = await patchMe(jsonRequest("/api/auth/me", { method: "PATCH", cookie, body: { birthday: "2000-01-31" } }));
+  assert.equal(patchOk.status, 200);
+  assert.equal((await readJson(patchOk)).data.birthday, "2000-01-31");
+  const patchClear = await patchMe(jsonRequest("/api/auth/me", { method: "PATCH", cookie, body: { birthday: "" } }));
+  assert.equal(patchClear.status, 200);
+  assert.equal((await readJson(patchClear)).data.birthday, null);
+});

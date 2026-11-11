@@ -415,7 +415,7 @@ export async function DELETE(request: NextRequest) {
     });
     await deletePublicMediaIfUnused(existingBanner.imageUrl);
 
-    return NextResponse.json({ success: true, message: "?? x?a banner." });
+    return NextResponse.json({ success: true, message: "Đã xóa banner." });
   } catch (error) {
     console.error("Lỗi khi xóa banner:", error);
     return NextResponse.json({ error: "Lỗi hệ thống khi xóa banner." }, { status: 500 });

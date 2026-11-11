@@ -6,7 +6,7 @@ export default function SubpagesBannersPage() {
       bannerType="subpage"
       heading="Quản lý Banner Trang con"
       modalTitle="Thêm Banner Trang con"
-      description="Banner d?ng cho c?c trang t?ng nh? g?i du l?ch, li?n h?, tin t?c, ?u ??i, h??ng d?n visa."
+      description="Banner dùng cho các trang con như combo đặc sản, sản phẩm đặc sản, câu chuyện ẩm thực, ưu đãi, liên hệ."
       mediaPlaceholder="Ví dụ: /news-banner.jpg hoặc /banners/subpage-video.mp4"
       linkColumnLabel="Trang áp dụng"
       linkLabel="Trang áp dụng"

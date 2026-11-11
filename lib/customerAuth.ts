@@ -102,3 +102,18 @@ export async function readBody(request: NextRequest): Promise<Record<string, unk
     return {};
   }
 }
+
+// Ngày sinh dạng YYYY-MM-DD; rỗng → null; sai định dạng, ngày không tồn tại hoặc ở tương lai (giờ VN) → lỗi
+export function parseBirthday(value: unknown): { ok: true; value: string | null } | { ok: false; error: string } {
+  if (value === undefined || value === null || value === "") return { ok: true, value: null };
+  const text = typeof value === "string" ? value.trim() : "";
+  if (!text) return { ok: true, value: null };
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  const date = match ? new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))) : null;
+  if (!match || !date || date.toISOString().slice(0, 10) !== text || Number(match[1]) < 1900) {
+    return { ok: false, error: "Ngày sinh không hợp lệ." };
+  }
+  const todayVn = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  if (text > todayVn) return { ok: false, error: "Ngày sinh không được ở tương lai." };
+  return { ok: true, value: text };
+}

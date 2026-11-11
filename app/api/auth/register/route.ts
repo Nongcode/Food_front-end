@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
-import { cleanText, fail, normalizeEmail, normalizePhone, readBody, setCustomerCookie, signCustomerToken, toPublicCustomer } from "@/lib/customerAuth";
+import { cleanText, fail, normalizeEmail, normalizePhone, parseBirthday, readBody, setCustomerCookie, signCustomerToken, toPublicCustomer } from "@/lib/customerAuth";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -17,6 +17,8 @@ export async function POST(request: NextRequest) {
     if (!EMAIL_PATTERN.test(email)) return fail("Email không hợp lệ.", 400);
     if (!phone) return fail("Số điện thoại không hợp lệ.", 400);
     if (password.length < 6) return fail("Mật khẩu cần ít nhất 6 ký tự.", 400);
+    const birthday = parseBirthday(body.birthday);
+    if (!birthday.ok) return fail(birthday.error, 400);
 
     const profile = {
       name,
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest) {
       phone,
       passwordHash: hashPassword(password),
       address: cleanText(body.address, 500),
-      birthday: cleanText(body.birthday, 20),
+      birthday: birthday.value,
       lastLoginAt: new Date(),
     };
 

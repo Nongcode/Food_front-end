@@ -310,7 +310,7 @@ export default function SettingsAdminPage() {
   // Xóa tài khoản admin
   const handleDeleteAdmin = async (id: number, email: string) => {
     if (email === "admin") {
-      alert("Không ???c ph?p x?a t?i kho?n qu?n tr? t?i cao g?c.");
+      alert("Không được phép xóa tài khoản quản trị tối cao gốc.");
       return;
     }
 
@@ -460,7 +460,7 @@ export default function SettingsAdminPage() {
                         onClick={() => handleDeleteAdmin(user.id, user.email)}
                         disabled={user.email === "admin"}
                         className={`p-1.5 rounded-lg transition-colors cursor-pointer inline-flex items-center ${user.email === "admin" ? 'text-slate-200 cursor-not-allowed' : 'hover:bg-rose-50 text-rose-400 hover:text-rose-600'}`}
-                        title={user.email === "admin" ? "Không ???c ph?p x?a Super Admin" : "Xóa tài khoản"}
+                        title={user.email === "admin" ? "Không được phép xóa Super Admin" : "Xóa tài khoản"}
                       >
                         <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
                       </button>

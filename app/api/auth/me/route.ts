@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { cleanText, fail, getCustomerSession, normalizePhone, readBody, toPublicCustomer } from "@/lib/customerAuth";
+import { cleanText, fail, getCustomerSession, normalizePhone, readBody, toPublicCustomer, parseBirthday } from "@/lib/customerAuth";
 
 // Chưa đăng nhập → data null (không trả 401 để mọi trang FE không log lỗi tài nguyên)
 export async function GET(request: NextRequest) {
@@ -27,7 +27,11 @@ export async function PATCH(request: NextRequest) {
       data.phone = phone;
     }
     if (body.address !== undefined) data.address = cleanText(body.address, 500);
-    if (body.birthday !== undefined) data.birthday = cleanText(body.birthday, 20);
+    if (body.birthday !== undefined) {
+      const birthday = parseBirthday(body.birthday);
+      if (!birthday.ok) return fail(birthday.error, 400);
+      data.birthday = birthday.value;
+    }
 
     const updated = await prisma.customer.update({ where: { id: customer.id }, data });
     return NextResponse.json({ success: true, data: toPublicCustomer(updated) });

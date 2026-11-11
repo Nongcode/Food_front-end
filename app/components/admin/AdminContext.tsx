@@ -343,10 +343,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     { id: 2, customerName: "Trần Đức Huy", email: "huy.tran@example.com", phone: "0987654321", tourName: "Set quà Mộc Châu cao cấp", bookingDate: "2026-07-22", travelDate: "2026-08-10", numberOfTravelers: 3, totalPrice: "2.670.000đ", status: "Đang xử lý", notes: "Cần in thiệp chúc mừng riêng." },
   ];
   const initialLanguages: LanguageSetting[] = [
-    { id: 1, code: "vi", name: "Tiếng Việt", flag: "ðŸ‡»ðŸ‡³", isActive: true, isDefault: true },
-    { id: 2, code: "en", name: "English", flag: "ðŸ‡ºðŸ‡¸", isActive: true, isDefault: false },
-    { id: 3, code: "zh", name: "ä¸­æ–‡", flag: "ðŸ‡¨ðŸ‡³", isActive: false, isDefault: false },
-    { id: 4, code: "ja", name: "æ—¥æœ¬èªž", flag: "ðŸ‡¯ðŸ‡µ", isActive: false, isDefault: false }
+    { id: 1, code: "vi", name: "Tiếng Việt", flag: "🇻🇳", isActive: true, isDefault: true },
+    { id: 2, code: "en", name: "English", flag: "🇺🇸", isActive: true, isDefault: false },
+    { id: 3, code: "zh", name: "中文", flag: "🇨🇳", isActive: false, isDefault: false },
+    { id: 4, code: "ja", name: "日本語", flag: "🇯🇵", isActive: false, isDefault: false }
   ];
 
   const initialTranslations: StaticTranslation[] = [
@@ -470,7 +470,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   });
   const [authReady, setAuthReady] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState<{ id: number; email: string; fullName: string; role: string } | null>(null);
-  // Kiá»ƒm tra phiÃªn lÃ m viá»‡c ngay khi load trang
+  // Kiểm tra phiên làm việc ngay khi load trang
   useEffect(() => {
     async function checkSession() {
       // Trang đăng nhập: proxy đã chuyển admin có phiên sang dashboard nên không gọi /api/admin/me (tránh lỗi 401 trên console)
@@ -498,7 +498,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (err) {
-        console.error("Lá»—i kiá»ƒm tra phiÃªn lÃ m viá»‡c:", err);
+        console.error("Lỗi kiểm tra phiên làm việc:", err);
         setIsAuthenticated(false);
         setCurrentAdmin(null);
       } finally {
@@ -559,7 +559,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } catch (err) {
-          console.error("Lá»—i khi táº£i danh sÃ¡ch bookings tá»« database:", err);
+          console.error("Lỗi khi tải danh sách bookings từ database:", err);
         }
       }
     }
@@ -578,7 +578,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } catch (err) {
-          console.error("Lá»—i khi táº£i danh sÃ¡ch reviews tá»« database:", err);
+          console.error("Lỗi khi tải danh sách reviews từ database:", err);
         }
       }
     }
@@ -597,7 +597,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } catch (err) {
-          console.error("Lá»—i khi táº£i danh sÃ¡ch khÃ¡ch hÃ ng tá»« database:", err);
+          console.error("Lỗi khi tải danh sách khách hàng từ database:", err);
         }
       }
     }
@@ -645,15 +645,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         if (data.success && data.post) {
           setPosts((current) => [data.post, ...current]);
         } else {
-          alert(data.error || "Lá»—i khi táº¡o bÃ i viáº¿t.");
+          alert(data.error || "Lỗi khi tạo bài viết.");
         }
       } else {
         const errorData = await res.json().catch(() => ({}));
-        alert(errorData.error || "Lá»—i káº¿t ná»‘i mÃ¡y chá»§ khi táº¡o bÃ i viáº¿t.");
+        alert(errorData.error || "Lỗi kết nối máy chủ khi tạo bài viết.");
       }
     } catch (err) {
-      console.error("Lá»—i khi thÃªm bÃ i viáº¿t:", err);
-      alert("Lá»—i há»‡ thá»‘ng khi thÃªm bÃ i viáº¿t.");
+      console.error("Lỗi khi thêm bài viết:", err);
+      alert("Lỗi hệ thống khi thêm bài viết.");
     }
   }
 
@@ -671,15 +671,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             current.map((post) => (post.id === id ? { ...post, ...data.post } : post))
           );
         } else {
-          alert(data.error || "Lá»—i khi cáº­p nháº­t bÃ i viáº¿t.");
+          alert(data.error || "Lỗi khi cập nhật bài viết.");
         }
       } else {
         const errorData = await res.json().catch(() => ({}));
-        alert(errorData.error || "Lá»—i káº¿t ná»‘i mÃ¡y chá»§ khi cáº­p nháº­t bÃ i viáº¿t.");
+        alert(errorData.error || "Lỗi kết nối máy chủ khi cập nhật bài viết.");
       }
     } catch (err) {
-      console.error("Lá»—i khi cáº­p nháº­t bÃ i viáº¿t:", err);
-      alert("Lá»—i há»‡ thá»‘ng khi cáº­p nháº­t bÃ i viáº¿t.");
+      console.error("Lỗi khi cập nhật bài viết:", err);
+      alert("Lỗi hệ thống khi cập nhật bài viết.");
     }
   }
 
@@ -693,15 +693,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         if (data.success) {
           setPosts((current) => current.filter((p) => p.id !== id));
         } else {
-          alert(data.error || "Lá»—i khi xÃ³a bÃ i viáº¿t.");
+          alert(data.error || "Lỗi khi xóa bài viết.");
         }
       } else {
         const errorData = await res.json().catch(() => ({}));
-        alert(errorData.error || "Lá»—i káº¿t ná»‘i mÃ¡y chá»§ khi xÃ³a bÃ i viáº¿t.");
+        alert(errorData.error || "Lỗi kết nối máy chủ khi xóa bài viết.");
       }
     } catch (err) {
-      console.error("Lá»—i khi xÃ³a bÃ i viáº¿t:", err);
-      alert("Lá»—i há»‡ thá»‘ng khi xÃ³a bÃ i viáº¿t.");
+      console.error("Lỗi khi xóa bài viết:", err);
+      alert("Lỗi hệ thống khi xóa bài viết.");
     }
   }
 
@@ -711,9 +711,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         id: Date.now(),
         name: p.name,
         destination: p.destination,
-        duration: p.duration ?? "3 ngÃ y 2 Ä‘Ãªm",
+        duration: p.duration ?? "3 ngày 2 đêm",
         price: p.price ?? "Liên hệ",
-        status: p.status ?? "Äang má»Ÿ",
+        status: p.status ?? "Đang mở",
       },
       ...current,
     ]);
@@ -826,12 +826,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         if (data.success && data.booking) {
           setBookings((current) => [data.booking, ...current]);
         } else {
-          alert(data.error || "Lá»—i khi táº¡o booking.");
+          alert(data.error || "Lỗi khi tạo booking.");
         }
       }
     } catch (err) {
-      console.error("Lá»—i khi thÃªm booking:", err);
-      alert("Lá»—i há»‡ thá»‘ng khi thÃªm booking.");
+      console.error("Lỗi khi thêm booking:", err);
+      alert("Lỗi hệ thống khi thêm booking.");
     }
   }
 
@@ -847,12 +847,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         if (data.success && data.booking) {
           setBookings((current) => current.map((it) => (it.id === id ? { ...it, ...data.booking } : it)));
         } else {
-          alert(data.error || "Lá»—i khi cáº­p nháº­t booking.");
+          alert(data.error || "Lỗi khi cập nhật booking.");
         }
       }
     } catch (err) {
-      console.error("Lá»—i khi cáº­p nháº­t booking:", err);
-      alert("Lá»—i há»‡ thá»‘ng khi cáº­p nháº­t booking.");
+      console.error("Lỗi khi cập nhật booking:", err);
+      alert("Lỗi hệ thống khi cập nhật booking.");
     }
   }
 
@@ -866,12 +866,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         if (data.success) {
           setBookings((current) => current.filter((it) => it.id !== id));
         } else {
-          alert(data.error || "Lá»—i khi xÃ³a booking.");
+          alert(data.error || "Lỗi khi xóa booking.");
         }
       }
     } catch (err) {
-      console.error("Lá»—i khi xÃ³a booking:", err);
-      alert("Lá»—i há»‡ thá»‘ng khi xÃ³a booking.");
+      console.error("Lỗi khi xóa booking:", err);
+      alert("Lỗi hệ thống khi xóa booking.");
     }
   }
 
@@ -916,7 +916,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (err) {
-      console.error("Lá»—i khi thÃªm review:", err);
+      console.error("Lỗi khi thêm review:", err);
     }
   }
 
@@ -934,7 +934,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (err) {
-      console.error("Lá»—i khi cáº­p nháº­t review:", err);
+      console.error("Lỗi khi cập nhật review:", err);
     }
   }
 
@@ -950,7 +950,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (err) {
-      console.error("Lá»—i khi xÃ³a review:", err);
+      console.error("Lỗi khi xóa review:", err);
     }
   }
 
@@ -970,7 +970,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (err) {
-      console.error("Lá»—i khi thÃªm customer:", err);
+      console.error("Lỗi khi thêm customer:", err);
     }
   }
 
@@ -988,7 +988,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (err) {
-      console.error("Lá»—i khi cáº­p nháº­t customer:", err);
+      console.error("Lỗi khi cập nhật customer:", err);
     }
   }
 
@@ -1004,7 +1004,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (err) {
-      console.error("Lá»—i khi xÃ³a customer:", err);
+      console.error("Lỗi khi xóa customer:", err);
     }
   }
 
@@ -1049,8 +1049,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
         return true;
       } else {
-        // NÃ©m lá»—i nháº­n Ä‘Æ°á»£c tá»« API Ä‘á»ƒ Client báº¯t Ä‘Æ°á»£c thÃ´ng bÃ¡o lá»—i cá»¥ thá»ƒ
-        throw new Error(data.error || "TÃªn Ä‘Äƒng nháº­p hoáº·c máº­t kháº©u khÃ´ng há»£p lá»‡.");
+        // Ném lỗi nhận được từ API để Client bắt được thông báo lỗi cụ thể
+        throw new Error(data.error || "Tên đăng nhập hoặc mật khẩu không hợp lệ.");
       }
     } catch (error) {
       setIsAuthenticated(false);
@@ -1069,7 +1069,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         credentials: "same-origin",
       });
     } catch (error) {
-      console.error("Lá»—i gá»i API Ä‘Äƒng xuáº¥t:", error);
+      console.error("Lỗi gọi API đăng xuất:", error);
     } finally {
       setIsAuthenticated(false);
       setCurrentAdmin(null);

@@ -212,7 +212,7 @@ export default function TranslationsPage() {
       const res = await fetch("/api/admin/static-translations/import", { method: "POST", body: formData });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Không import được file bản dịch.");
-      alert(`?? import ${data.imported || 0} kh?a b?n d?ch.`);
+      alert(`Đã import ${data.imported || 0} khóa bản dịch.`);
       await loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không import được file bản dịch.");

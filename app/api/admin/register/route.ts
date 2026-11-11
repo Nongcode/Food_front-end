@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
                 );
             }
         } else {
-            console.log("H? th?ng ch?a c? admin n?o. Cho ph?p ??ng k? t?i kho?n ??u ti?n.");
+            console.log("Hệ thống chưa có admin nào. Cho phép đăng ký tài khoản đầu tiên.");
         }
 
         // 3. Kiểm tra xem email đăng ký đã tồn tại hay chưa
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
         if (existingAdmin) {
             return NextResponse.json(
-                { error: "Email n?y ?? ???c s? d?ng b?i m?t t?i kho?n qu?n tr? kh?c." },
+                { error: "Email này đã được sử dụng bởi một tài khoản quản trị khác." },
                 { status: 400 }
             );
         }
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     } catch (error: any) {
         console.error("Lỗi đăng ký admin:", error);
         return NextResponse.json(
-            { error: "?? x?y ra l?i h? th?ng khi x? l? y?u c?u." },
+            { error: "Đã xảy ra lỗi hệ thống khi xử lý yêu cầu." },
             { status: 500 }
         );
     }

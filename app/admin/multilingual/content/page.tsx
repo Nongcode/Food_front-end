@@ -74,7 +74,7 @@ export default function ContentTranslationsPage() {
 
   async function importTranslations() {
     if (!importFile) {
-      setMessage("Vui l?ng ch?n file CSV ho?c XLSX ?? d?ch.");
+      setMessage("Vui lòng chọn file CSV hoặc XLSX đã dịch.");
       return;
     }
     setLoading(true);
@@ -86,7 +86,7 @@ export default function ContentTranslationsPage() {
       const res = await fetch("/api/admin/content-translations/import", { method: "POST", body: formData });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Không import được file dịch.");
-      setMessage(`?? import ${data.importedCount || 0} b?n d?ch, b? qua ${data.skippedCount || 0} d?ng thi?u d? li?u.`);
+      setMessage(`Đã import ${data.importedCount || 0} bản dịch, bỏ qua ${data.skippedCount || 0} dòng thiếu dữ liệu.`);
       await loadTranslations();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Không import được file dịch.");
@@ -105,7 +105,7 @@ export default function ContentTranslationsPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Không lưu được bản dịch.");
-      setMessage("?? l?u b?n d?ch.");
+      setMessage("Đã lưu bản dịch.");
       await loadTranslations();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "JSON không hợp lệ hoặc không lưu được bản dịch.");
@@ -181,7 +181,7 @@ export default function ContentTranslationsPage() {
 
       <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div className="text-sm text-slate-600">
-          {importFile ? <span className="font-semibold text-slate-800">File đã chọn: {importFile.name}</span> : "Sau khi xu?t CSV, ?i?n c?t translatedText r?i import l?i t?i ??y."}
+          {importFile ? <span className="font-semibold text-slate-800">File đã chọn: {importFile.name}</span> : "Sau khi xuất CSV, điền cột translatedText rồi import lại tại đây."}
         </div>
         <button type="button" onClick={importTranslations} disabled={loading || !importFile} className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">Import bản dịch</button>
       </div>
