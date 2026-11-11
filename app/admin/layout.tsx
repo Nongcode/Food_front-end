@@ -4,7 +4,7 @@ import AdminShell from "../components/admin/AdminShell";
 import { AdminProvider } from "../components/admin/AdminContext";
 
 export const metadata: Metadata = {
-  title: "Admin | Sơn La Food",
+  title: { default: "Admin", template: "%s | Sơn La Food" },
   robots: noIndexRobots,
 };
 

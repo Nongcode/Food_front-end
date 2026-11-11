@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { noIndexRobots } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Đăng nhập quản trị | Sơn La Food",
+  title: "Đăng nhập quản trị",
   robots: noIndexRobots,
 };
 
