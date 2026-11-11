@@ -62,7 +62,10 @@ export async function POST(request: NextRequest) {
       page_local_specialties_status: ["active", "inactive"],
     };
     const entries = Object.entries(settings as Record<string, unknown>);
+    // Phí đóng gói đơn hàng: chuỗi số nguyên ≥ 0
+    const numericSettings = ["order_packing_fee"];
     const invalidEntry = entries.find(([key, value]) => {
+      if (numericSettings.includes(key)) return typeof value !== "string" || !/^\d+$/.test(value);
       return !settingRules[key] || typeof value !== "string" || !settingRules[key].includes(value);
     });
     if (entries.length === 0 || invalidEntry) {

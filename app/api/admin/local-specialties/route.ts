@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { parsePriceValue } from "@/lib/price";
 import { verifyAdminSession } from "@/lib/adminAuth";
 import { slugify } from "@/lib/slug";
 import { getContentTranslations, saveContentTranslations } from "@/lib/translation/adminContent";
@@ -47,6 +48,8 @@ export async function GET(request: NextRequest) {
       description: item.description || "",
       imageUrl: item.imageUrl || "",
       priceText: item.priceText || "",
+      priceValue: item.price ?? null,
+      priceUnit: item.priceUnit || "",
       whereToBuy: item.whereToBuy || "",
       status: item.status,
       hasDetail: Boolean(item.detail),
@@ -70,6 +73,8 @@ export async function POST(request: NextRequest) {
     if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
+    const priceValue = parsePriceValue(body.priceValue);
+    if (Number.isNaN(priceValue)) return NextResponse.json({ error: "Giá phải là số nguyên không âm." }, { status: 400 });
     const name = optionalString(body.name);
     const type = optionalString(body.type) || "FOOD";
     const destName = optionalString(body.destinationName);
@@ -97,6 +102,8 @@ export async function POST(request: NextRequest) {
         description: optionalString(body.description),
         imageUrl: optionalString(body.imageUrl),
         priceText: optionalString(body.priceText),
+        price: priceValue ?? null,
+        priceUnit: optionalString(body.priceUnit),
         whereToBuy: optionalString(body.whereToBuy),
         status: optionalString(body.status) || "Hiển thị",
       },
@@ -119,6 +126,8 @@ export async function PUT(request: NextRequest) {
     if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
+    const priceValue = parsePriceValue(body.priceValue);
+    if (Number.isNaN(priceValue)) return NextResponse.json({ error: "Giá phải là số nguyên không âm." }, { status: 400 });
     const id = optionalNumber(body.id);
     if (!id) return NextResponse.json({ error: "ID đặc sản không hợp lệ." }, { status: 400 });
 
@@ -155,6 +164,8 @@ export async function PUT(request: NextRequest) {
         description: body.description !== undefined ? optionalString(body.description) : undefined,
         imageUrl: body.imageUrl !== undefined ? optionalString(body.imageUrl) : undefined,
         priceText: body.priceText !== undefined ? optionalString(body.priceText) : undefined,
+        price: priceValue,
+        priceUnit: body.priceUnit !== undefined ? optionalString(body.priceUnit) : undefined,
         whereToBuy: body.whereToBuy !== undefined ? optionalString(body.whereToBuy) : undefined,
         status: optionalString(body.status) || undefined,
       },

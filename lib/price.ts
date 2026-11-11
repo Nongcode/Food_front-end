@@ -10,3 +10,11 @@ export function parsePriceText(text: string | null | undefined): { price: number
   const unit = slashIndex >= 0 ? text.slice(slashIndex + 1).trim() : "";
   return { price, unit: unit || null };
 }
+
+// Giá admin gửi lên: không gửi → undefined (giữ nguyên), rỗng/null → null, số nguyên ≥ 0 → số; sai → NaN
+export function parsePriceValue(value: unknown): number | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return null;
+  const text = typeof value === "number" ? String(value) : typeof value === "string" ? value.trim() : "";
+  return /^\d+$/.test(text) ? Number(text) : NaN;
+}

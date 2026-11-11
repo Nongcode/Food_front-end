@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
 
     const customers = await prisma.customer.findMany({
       orderBy: { createdAt: "desc" },
+      include: { _count: { select: { orders: true } } },
     });
 
     const formattedCustomers = customers.map((customer) => ({
@@ -28,6 +29,8 @@ export async function GET(request: NextRequest) {
       phone: customer.phone,
       totalBookings: customer.totalBookings,
       totalSpent: customer.totalSpent,
+      hasAccount: customer.passwordHash !== null,
+      orderCount: customer._count.orders,
       notes: customer.notes || undefined,
       status: customer.status,
       dateAdded: customer.createdAt.toISOString().split("T")[0],

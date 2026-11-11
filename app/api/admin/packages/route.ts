@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { parsePriceValue } from "@/lib/price";
 import { verifyAdminSession } from "@/lib/adminAuth";
 import { slugify } from "@/lib/slug";
 import { getContentTranslations, saveContentTranslations, validateRequiredTranslations } from "@/lib/translation/adminContent";
@@ -10,6 +11,8 @@ type PackageRow = {
   name: string;
   duration: string | null;
   priceText: string | null;
+  price: number | null;
+  priceUnit: string | null;
   summary: string | null;
   description: string | null;
   minPeople: number | null;
@@ -48,6 +51,8 @@ async function formatPackage(pkg: PackageRow) {
     offer: pkg.offer ? { id: pkg.offer.id, title: pkg.offer.title, description: pkg.offer.description || "", validUntil: pkg.offer.validUntil ? pkg.offer.validUntil.toISOString() : null, tag: pkg.offer.tag || "" } : null,
     duration: pkg.duration || "",
     price: pkg.priceText || "",
+    priceValue: pkg.price ?? null,
+    priceUnit: pkg.priceUnit || "",
     status: pkg.status,
     summary: pkg.summary || "",
     description: pkg.description || "",
@@ -116,6 +121,8 @@ export async function POST(request: NextRequest) {
   try {
     if (!verifyAdminSession(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await request.json();
+    const priceValue = parsePriceValue(body.priceValue);
+    if (Number.isNaN(priceValue)) return NextResponse.json({ error: "Giá phải là số nguyên không âm." }, { status: 400 });
     const name = String(body.name || "").trim();
     if (!name) return NextResponse.json({ error: "Package name is required." }, { status: 400 });
     const missingTranslations = validateRequiredTranslations("package", body.translations || {});
@@ -154,6 +161,8 @@ export async function POST(request: NextRequest) {
         offerId: finalOfferId,
         duration: optionalString(body.duration),
         priceText: optionalString(body.price),
+        price: priceValue ?? null,
+        priceUnit: optionalString(body.priceUnit),
         summary: optionalString(body.summary),
         description: optionalString(body.description) || optionalString(body.summary),
         minPeople: optionalNumber(body.minPeople),
@@ -179,6 +188,8 @@ export async function PUT(request: NextRequest) {
   try {
     if (!verifyAdminSession(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await request.json();
+    const priceValue = parsePriceValue(body.priceValue);
+    if (Number.isNaN(priceValue)) return NextResponse.json({ error: "Giá phải là số nguyên không âm." }, { status: 400 });
     const id = Number(body.id);
     if (!Number.isInteger(id)) return NextResponse.json({ error: "Invalid package id." }, { status: 400 });
     const existing = await prisma.package.findUnique({ where: { id } });
@@ -229,6 +240,8 @@ export async function PUT(request: NextRequest) {
         offerId: finalOfferId,
         duration: body.duration !== undefined ? optionalString(body.duration) : undefined,
         priceText: body.price !== undefined ? optionalString(body.price) : undefined,
+        price: priceValue,
+        priceUnit: body.priceUnit !== undefined ? optionalString(body.priceUnit) : undefined,
         summary: body.summary !== undefined ? optionalString(body.summary) : undefined,
         description: body.description !== undefined ? optionalString(body.description) : undefined,
         minPeople: body.minPeople !== undefined ? optionalNumber(body.minPeople) : undefined,
