@@ -14,7 +14,7 @@ type SubMenuItem = {
 type MenuItemGroupProps = {
   label: string;
   icon: React.ReactNode;
-  activePattern: string; // prefix to match (e.g. "/admin/posts")
+  activePattern: string | string[]; // prefix to match (e.g. "/admin/posts"), or several prefixes
   items: SubMenuItem[];
 };
 
@@ -54,7 +54,7 @@ const MenuItemGroup = ({
   items,
 }: MenuItemGroupProps) => {
   const pathname = usePathname();
-  const isPatternActive = pathname.startsWith(activePattern);
+  const isPatternActive = (Array.isArray(activePattern) ? activePattern : [activePattern]).some((pattern) => pathname.startsWith(pattern));
   const [isOpen, setIsOpen] = useState(isPatternActive);
   const hasActiveChild = items.some((item) => pathname === item.href);
 
@@ -214,17 +214,22 @@ export default function AdminSidebar() {
           <MenuItemGroup
             label="Quản lý Đơn đặt hàng"
             icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><path d="M8 16h8" /><path d="M8 12h8" /></svg>}
-            activePattern="/admin/bookings"
+            activePattern={["/admin/orders", "/admin/inquiries", "/admin/bookings"]}
             items={[
-              { 
-                href: "/admin/bookings", 
-                label: "Danh sách yêu cầu",
+              {
+                href: "/admin/orders",
+                label: "Đơn hàng",
                 icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
               },
-              { 
-                href: "/admin/bookings/status", 
-                label: "Trạng thái xử lý",
-                icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+              {
+                href: "/admin/inquiries",
+                label: "Yêu cầu tư vấn",
+                icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              },
+              {
+                href: "/admin/bookings",
+                label: "Yêu cầu cũ (lưu trữ)",
+                icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
               },
             ]}
           />
