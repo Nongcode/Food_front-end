@@ -75,8 +75,11 @@ test("đăng nhập sai trả cùng thông báo 401; đúng thì cập nhật la
   assert.ok(customer.lastLoginAt);
 });
 
-test("/me: 401 khi chưa đăng nhập; PATCH không đổi email", async () => {
-  assert.equal((await getMe(jsonRequest("/api/auth/me"))).status, 401);
+test("/me: GET chưa đăng nhập trả data null (không log lỗi 401 trên mọi trang), PATCH 401; PATCH không đổi email", async () => {
+  const anonymous = await getMe(jsonRequest("/api/auth/me"));
+  assert.equal(anonymous.status, 200);
+  assert.equal((await readJson(anonymous)).data, null);
+  assert.equal((await patchMe(jsonRequest("/api/auth/me", { method: "PATCH", body: { name: "X" } }))).status, 401);
 
   const email = uniqueEmail();
   const reg = await register(jsonRequest("/api/auth/register", { body: registerBody(email) }));

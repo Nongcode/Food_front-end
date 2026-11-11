@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { cleanText, fail, getCustomerSession, normalizePhone, readBody, toPublicCustomer } from "@/lib/customerAuth";
 
+// Chưa đăng nhập → data null (không trả 401 để mọi trang FE không log lỗi tài nguyên)
 export async function GET(request: NextRequest) {
   const customer = await getCustomerSession(request);
-  if (!customer) return fail("Vui lòng đăng nhập.", 401);
-  return NextResponse.json({ success: true, data: toPublicCustomer(customer) });
+  return NextResponse.json({ success: true, data: customer ? toPublicCustomer(customer) : null });
 }
 
 // Sửa hồ sơ; email không đổi được
