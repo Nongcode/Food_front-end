@@ -517,19 +517,19 @@ function PackageTranslationFields({ translations, onChange }: { translations: Pa
     <section className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 space-y-4">
       <div>
         <h4 className="text-xs font-extrabold uppercase tracking-widest text-emerald-700">Bản dịch combo đặc sản</h4>
-        <p className="text-xs text-slate-500 mt-1">Cần nhập đủ tiếng Anh và tiếng Trung để website hiển thị đúng theo ngôn ngữ đã chọn.</p>
+        <p className="text-xs text-slate-500 mt-1">Không bắt buộc. Trường nào để trống, website sẽ hiển thị nội dung tiếng Việt.</p>
       </div>
       {locales.map((locale) => (
         <div key={locale.code} className="rounded-xl border border-white bg-white/80 p-4 space-y-3">
           <p className="text-xs font-black uppercase tracking-widest text-slate-600">{locale.label}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input required value={translations[locale.code]?.name || ""} onChange={(event) => onChange(locale.code, "name", event.target.value)} placeholder="Package name" className={`${inputClass} bg-white`} />
-            <input required value={translations[locale.code]?.destination || ""} onChange={(event) => onChange(locale.code, "destination", event.target.value)} placeholder="Destination" className={`${inputClass} bg-white`} />
-            <input required value={translations[locale.code]?.duration || ""} onChange={(event) => onChange(locale.code, "duration", event.target.value)} placeholder="Duration" className={`${inputClass} bg-white`} />
+            <input value={translations[locale.code]?.name || ""} onChange={(event) => onChange(locale.code, "name", event.target.value)} placeholder="Package name" className={`${inputClass} bg-white`} />
+            <input value={translations[locale.code]?.destination || ""} onChange={(event) => onChange(locale.code, "destination", event.target.value)} placeholder="Destination" className={`${inputClass} bg-white`} />
+            <input value={translations[locale.code]?.duration || ""} onChange={(event) => onChange(locale.code, "duration", event.target.value)} placeholder="Duration" className={`${inputClass} bg-white`} />
             <input value={translations[locale.code]?.peopleNote || ""} onChange={(event) => onChange(locale.code, "peopleNote", event.target.value)} placeholder="People note" className={`${inputClass} bg-white`} />
           </div>
-          <textarea required rows={2} value={translations[locale.code]?.summary || ""} onChange={(event) => onChange(locale.code, "summary", event.target.value)} placeholder="Card summary" className={`${inputClass} bg-white resize-y`} />
-          <textarea required rows={3} value={translations[locale.code]?.description || ""} onChange={(event) => onChange(locale.code, "description", event.target.value)} placeholder="Detail page description" className={`${inputClass} bg-white resize-y`} />
+          <textarea rows={2} value={translations[locale.code]?.summary || ""} onChange={(event) => onChange(locale.code, "summary", event.target.value)} placeholder="Card summary" className={`${inputClass} bg-white resize-y`} />
+          <textarea rows={3} value={translations[locale.code]?.description || ""} onChange={(event) => onChange(locale.code, "description", event.target.value)} placeholder="Detail page description" className={`${inputClass} bg-white resize-y`} />
         </div>
       ))}
     </section>

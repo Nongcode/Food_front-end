@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { verifyToken } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
-import { getContentTranslations, saveContentTranslations, validateRequiredTranslations } from "@/lib/translation/adminContent";
+import { getContentTranslations, saveContentTranslations } from "@/lib/translation/adminContent";
 
 const DRAFT_STATUS = "Bản nháp";
 const PUBLISHED_STATUS = "Đã xuất bản";
@@ -107,10 +107,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Tiêu đề bài viết không được trống." }, { status: 400 });
     }
 
-    const missingTranslations = validateRequiredTranslations("post", body.translations || {});
-    if (missingTranslations.length > 0) {
-      return NextResponse.json({ error: "Vui lòng nhập đủ bản dịch tiếng Anh và tiếng Trung cho bài viết.", missingTranslations }, { status: 400 });
-    }
+    // Bản dịch EN/ZH không bắt buộc: locale để trống sẽ bị bỏ qua, FE hiển thị bản tiếng Việt.
 
     const categoryName = category ? category.trim() : UNCATEGORIZED;
     const postStatus = status || DRAFT_STATUS;
@@ -219,12 +216,6 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Bài viết không tồn tại trên hệ thống." }, { status: 404 });
     }
 
-    if (body.translations !== undefined) {
-      const missingTranslations = validateRequiredTranslations("post", body.translations || {});
-      if (missingTranslations.length > 0) {
-        return NextResponse.json({ error: "Vui lòng nhập đủ bản dịch tiếng Anh và tiếng Trung cho bài viết.", missingTranslations }, { status: 400 });
-      }
-    }
 
     const updateData: Record<string, unknown> = {};
 

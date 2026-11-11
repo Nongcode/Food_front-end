@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { parsePriceValue } from "@/lib/price";
 import { verifyAdminSession } from "@/lib/adminAuth";
 import { slugify } from "@/lib/slug";
-import { getContentTranslations, saveContentTranslations, validateRequiredTranslations } from "@/lib/translation/adminContent";
+import { getContentTranslations, saveContentTranslations } from "@/lib/translation/adminContent";
 
 type PackageRow = {
   id: number;
@@ -125,10 +125,7 @@ export async function POST(request: NextRequest) {
     if (Number.isNaN(priceValue)) return NextResponse.json({ error: "Giá phải là số nguyên không âm." }, { status: 400 });
     const name = String(body.name || "").trim();
     if (!name) return NextResponse.json({ error: "Package name is required." }, { status: 400 });
-    const missingTranslations = validateRequiredTranslations("package", body.translations || {});
-    if (missingTranslations.length > 0) {
-      return NextResponse.json({ error: "Vui lòng nhập đủ bản dịch tiếng Anh và tiếng Trung cho combo đặc sản.", missingTranslations }, { status: 400 });
-    }
+    // Bản dịch EN/ZH không bắt buộc: locale để trống sẽ bị bỏ qua, FE hiển thị bản tiếng Việt.
 
     const destination = await findOrCreateDestination(String(body.destination || ""));
     const baseSlug = slugify(body.slug || name) || "goi-du-lich";
@@ -194,12 +191,6 @@ export async function PUT(request: NextRequest) {
     if (!Number.isInteger(id)) return NextResponse.json({ error: "Invalid package id." }, { status: 400 });
     const existing = await prisma.package.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ error: "Package not found." }, { status: 404 });
-    if (body.translations !== undefined) {
-      const missingTranslations = validateRequiredTranslations("package", body.translations || {});
-      if (missingTranslations.length > 0) {
-        return NextResponse.json({ error: "Vui lòng nhập đủ bản dịch tiếng Anh và tiếng Trung cho combo đặc sản.", missingTranslations }, { status: 400 });
-      }
-    }
 
     let finalOfferId = existing.offerId;
 
