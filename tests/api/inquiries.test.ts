@@ -1,5 +1,6 @@
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
+import prisma from "../../lib/prisma";
 import { cleanupTestData, cookieFrom, jsonRequest, readJson, uniqueEmail } from "../helpers";
 import { POST as register } from "../../app/api/auth/register/route";
 import { GET as listInquiries, POST as createInquiry } from "../../app/api/inquiries/route";
@@ -64,4 +65,17 @@ test("GET chỉ trả yêu cầu của khách đang đăng nhập", async () => 
 
   const resB = await listInquiries(jsonRequest("/api/inquiries", { cookie: cookieB }));
   assert.equal((await readJson(resB)).data.length, 0);
+});
+
+test("API khách không trả ghi chú nội bộ adminNote (POST, GET)", async () => {
+  const res = await createInquiry(jsonRequest("/api/inquiries", { cookie: cookieA, body: validBody }));
+  const { data } = await readJson(res);
+  assert.equal(res.status, 201);
+  assert.ok(!("adminNote" in data), "POST trả adminNote");
+
+  await prisma.inquiry.update({ where: { id: data.id }, data: { adminNote: "Ghi chú nội bộ bí mật" } });
+  const list = (await readJson(await listInquiries(jsonRequest("/api/inquiries", { cookie: cookieA })))).data;
+  assert.ok(list.length >= 1);
+  assert.ok(list.every((item: object) => !("adminNote" in item)), "GET trả adminNote");
+  assert.ok(!JSON.stringify(list).includes("Ghi chú nội bộ bí mật"));
 });

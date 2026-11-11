@@ -175,3 +175,13 @@ export async function createOrder(customerId: number, body: unknown): Promise<Or
     }
   }
 }
+
+// Bỏ trường nội bộ (ghi chú admin) trước khi trả cho khách
+function omitAdminNote<T extends { adminNote?: string | null }>(record: T): Omit<T, "adminNote"> {
+  const copy: Partial<T> = { ...record };
+  delete copy.adminNote;
+  return copy as Omit<T, "adminNote">;
+}
+
+export const toCustomerOrder = omitAdminNote;
+export const toCustomerInquiry = omitAdminNote;

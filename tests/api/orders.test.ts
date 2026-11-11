@@ -130,3 +130,23 @@ test("GET /api/public/order-settings trả phí đóng gói", async () => {
   assert.equal(res.status, 200);
   assert.deepEqual((await readJson(res)).data, { packingFee: expected });
 });
+
+test("API khách không trả ghi chú nội bộ adminNote (GET, POST, PATCH)", async () => {
+  const created = await createOrder(jsonRequest("/api/orders", { cookie: cookieA, body: orderBody([{ itemType: "package", slug: pkgSlug, quantity: 1 }]) }));
+  const createdData = (await readJson(created)).data;
+  assert.equal(created.status, 201);
+  assert.ok(!("adminNote" in createdData), "POST trả adminNote");
+
+  await prisma.order.update({ where: { code: createdData.code }, data: { adminNote: "Ghi chú nội bộ bí mật" } });
+
+  const list = (await readJson(await listOrders(jsonRequest("/api/orders", { cookie: cookieA })))).data;
+  const listed = list.find((order: { code: string }) => order.code === createdData.code);
+  assert.ok(listed);
+  assert.ok(!("adminNote" in listed), "GET trả adminNote");
+  assert.ok(!JSON.stringify(list).includes("Ghi chú nội bộ bí mật"));
+
+  const edited = await patch(createdData.code, { note: "Giao giờ hành chính" }, cookieA);
+  const editedData = (await readJson(edited)).data;
+  assert.equal(edited.status, 200);
+  assert.ok(!("adminNote" in editedData), "PATCH trả adminNote");
+});

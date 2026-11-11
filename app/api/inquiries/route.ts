@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { toCustomerInquiry } from "@/lib/orders";
 import { cleanText, fail, getCustomerSession, normalizeEmail, normalizePhone, readBody } from "@/lib/customerAuth";
 
 const MAX_TEXT = 2000;
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
     where: { customerId: customer.id },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
   });
-  return NextResponse.json({ success: true, data: inquiries });
+  return NextResponse.json({ success: true, data: inquiries.map(toCustomerInquiry) });
 }
 
 export async function POST(request: NextRequest) {
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     const inquiry = await prisma.inquiry.create({
       data: { ...optional, requestType, contactName, contactPhone, contactEmail: contactEmail || null, customerId: customer.id },
     });
-    return NextResponse.json({ success: true, data: inquiry }, { status: 201 });
+    return NextResponse.json({ success: true, data: toCustomerInquiry(inquiry) }, { status: 201 });
   } catch (error) {
     console.error("Lỗi tạo yêu cầu tư vấn:", error);
     return fail("Đã xảy ra lỗi hệ thống, vui lòng thử lại sau.", 500);

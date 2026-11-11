@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { cleanText, fail, getCustomerSession, readBody } from "@/lib/customerAuth";
-import { OrderInputError, readReceiver } from "@/lib/orders";
+import { OrderInputError, readReceiver, toCustomerOrder } from "@/lib/orders";
 
 // Khách chỉ sửa / huỷ đơn của mình khi đơn còn "pending"
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
@@ -29,7 +29,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (result.count === 0) return fail("Đơn hàng đã được xử lý, không thể thay đổi.", 409);
 
     const updated = await prisma.order.findUnique({ where: { id: order.id }, include: { items: true } });
-    return NextResponse.json({ success: true, data: updated });
+    return NextResponse.json({ success: true, data: updated ? toCustomerOrder(updated) : null });
   } catch (error) {
     if (error instanceof OrderInputError) return fail(error.message, 400);
     console.error("Lỗi cập nhật đơn hàng:", error);
