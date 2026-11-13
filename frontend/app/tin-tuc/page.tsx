@@ -1,0 +1,105 @@
+import type { Metadata } from "next";
+import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
+import Link from "next/link";
+import { PageDisabled } from "../components/PageDisabled";
+import { JsonLd } from "../components/JsonLd";
+import { headers } from "next/headers";
+import { NewsPostGrid } from "../components/NewsPostGrid";
+import { SiteHeader } from "../components/SiteHeader";
+import { isSitePageInactive } from "@/lib/siteSettings";
+import { normalizeLocale, withLocalePrefix } from "@/lib/i18n/config";
+import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
+import { getPageTranslator } from "@/lib/i18n/pageCopy";
+import { getPublicPosts } from "@/lib/publicContent";
+import { backgroundWithFallback } from "@/lib/imageFallback";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { tr } = await getPageTranslator("news");
+  return publicPageMetadata({
+    title: tr("meta_title", "Câu chuyện ẩm thực Sơn La, mẹo chọn đặc sản"),
+    description: tr("meta_description", "Đọc câu chuyện ẩm thực Sơn La, mẹo chọn đặc sản, cách dùng chẩm chéo, thịt gác bếp, chè Shan tuyết và nông sản theo mùa."),
+    path: "/tin-tuc",
+  });
+}
+
+
+const legacyDecoder = new TextDecoder("windows-1252");
+const toLegacyMojibake = (value: string) => legacyDecoder.decode(Buffer.from(value, "utf8"));
+const toDoubleLegacyMojibake = (value: string) => toLegacyMojibake(toLegacyMojibake(value));
+const PUBLISHED_STATUS = "Đã xuất bản";
+const PUBLISHED_STATUSES = [PUBLISHED_STATUS, toLegacyMojibake(PUBLISHED_STATUS), toDoubleLegacyMojibake(PUBLISHED_STATUS)];
+
+function getDateLocale(locale: string) {
+  if (locale === "en") return "en-US";
+  if (locale === "zh-CN") return "zh-CN";
+  return "vi-VN";
+}
+
+export default async function NewsPage() {
+  if (await isSitePageInactive("page_news_status")) {
+    return <PageDisabled pageName="Tin tức & Cẩm nang" />;
+  }
+
+  const locale = normalizeLocale((await headers()).get("x-locale"));
+  const translations = await getStaticTranslationMap(locale).catch(() => ({}));
+  const t = (namespace: string, key: string, fallback: string) => translateFromMap(translations, namespace, key, fallback);
+
+  const postsPayload = await getPublicPosts(locale);
+  const posts = postsPayload.posts;
+  const leadPost = postsPayload.leadPost || {
+    id: 0,
+    category: t("news", "fallback_category", "Cẩm nang"),
+    title: t("news", "empty_title", "Chưa có bài viết nào"),
+    excerpt: t("news", "empty_excerpt", "Vui lòng đăng bài viết mới ở trang quản trị."),
+    image: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?auto=format&fit=crop&w=1000&q=80",
+    readTime: t("news", "read_time_zero", "0 phút đọc"),
+    date: "",
+  };
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: t("news", "all_title", "Tất cả bài viết"),
+    url: absoluteUrl("/tin-tuc"),
+    itemListElement: posts.slice(0, 50).map((post, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: post.title,
+      url: absoluteUrl(`/tin-tuc/${post.id}`),
+    })),
+  };
+
+  return (
+    <main className="news-page">
+      <JsonLd data={itemListJsonLd} />
+      <SiteHeader variant="hero" />
+      <section className="page-hero news-hero">
+        <p className="eyebrow">{t("news", "hero_eyebrow", "Câu chuyện ẩm thực")}</p>
+        <h1>{t("news", "hero_title", "Góc đọc trước khi chọn món.")}</h1>
+        <p>{t("news", "hero_copy", "Tổng hợp bài viết về đặc sản Sơn La, mùa nông sản, cách dùng gia vị Tây Bắc và cách chọn combo phù hợp từng dịp.")}</p>
+      </section>
+
+      <section className="editorial-lead">
+        <div
+          className="editorial-image"
+          style={{ backgroundImage: backgroundWithFallback(leadPost.image) }}
+        />
+        <div className="editorial-copy">
+          <p className="eyebrow">{leadPost.category}</p>
+          <h2>{leadPost.title}</h2>
+          <p>{leadPost.excerpt}</p>
+          <Link href={withLocalePrefix("/#consult", locale)}>{t("news", "lead_cta", "Cần tư vấn món này")}</Link>
+        </div>
+      </section>
+
+      <section className="section-shell">
+        <div className="section-heading compact">
+          <p className="eyebrow">{t("news", "latest_eyebrow", "Bài mới nhất")}</p>
+          <h2>{t("news", "all_title", "Tất cả bài viết")}</h2>
+        </div>
+        <NewsPostGrid posts={posts.length > 1 ? posts.slice(1) : []} />
+      </section>
+    </main>
+  );
+}

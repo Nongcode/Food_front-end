@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sửa lỗi tồn đọng sau QA</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #fff; --text: #1d2330; --muted: #667085; --border: #e3e6ea;
+    --accent: #2563eb; --ok: #16a34a; --warn: #d97706; --err: #dc2626; --changed: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --surface: #1b1f27; --text: #e6e8ec; --muted: #98a2b3; --border: #2c323d;
+      --accent: #60a5fa; --ok: #4ade80; --warn: #fbbf24; --err: #f87171; --changed: #3b3214;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  header { padding: 20px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0 0 4px; font-size: 20px; }
+  .meta { color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid currentColor; }
+  .s-doing { color: var(--warn); } .s-done { color: var(--ok); } .s-todo { color: var(--muted); } .s-blocked { color: var(--err); }
+  nav { display: flex; gap: 4px; padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px; color: var(--muted); font: inherit; cursor: pointer; white-space: nowrap; }
+  nav button[aria-selected="true"] { color: var(--accent); border-color: var(--accent); }
+  main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+  section[hidden] { display: none; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 12px; font-size: 16px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .next { border-left: 4px solid var(--warn); }
+  .legend { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  /* Đánh dấu phần giao diện thay đổi trong yêu cầu hiện tại: thêm class="changed" */
+  .changed { outline: 2px dashed var(--warn); outline-offset: 2px; background: var(--changed); }
+  /* ===== Prototype ===== */
+  .proto { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+  .proto-toolbar { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .proto input, .proto select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
+  .proto .btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; font: inherit; }
+  .proto .btn.secondary { background: transparent; color: var(--accent); }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  @media (max-width: 640px) { main, header { padding: 16px; } nav { padding: 0 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Sửa lỗi tồn đọng sau QA (CR-002)</h1>
+  <div class="meta">
+    <span>Module: <code>tich-hop/dong-bo-fe-be/sua-loi-qa</code></span>
+    <span>Trạng thái: <span class="badge s-done" id="overall">✅ DONE</span></span>
+    <span>Cập nhật: <span id="updated">2026-11-11 16:44</span></span>
+  </div>
+</header>
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-tab="ui">Giao diện</button>
+  <button role="tab" aria-selected="false" data-tab="func">Chức năng &amp; API</button>
+  <button role="tab" aria-selected="false" data-tab="progress">Tiến độ</button>
+</nav>
+<main>
+  <section id="ui">
+    <p class="legend">Prototype bằng dữ liệu mẫu. Viền vàng = phần thay đổi trong CR-002.</p>
+    <div class="proto changed">
+      <div class="proto-toolbar"><strong>/gio-hang — giá lấy lại từ BE</strong></div>
+      <div style="padding:12px">
+        <p class="badge s-doing">Giá một số sản phẩm đã thay đổi, giỏ hàng đã cập nhật theo giá mới.</p>
+        <table><thead><tr><th>Món</th><th>SL</th><th>Đơn giá</th></tr></thead><tbody>
+          <tr><td>Combo đặc sản Sơn La</td><td>1</td><td>590.000đ</td></tr>
+          <tr><td>Xoài tròn Yên Châu</td><td>1</td><td>Giá liên hệ</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="proto changed" style="margin-top:16px">
+      <div class="proto-toolbar"><strong>/tai-khoan — Đơn hàng của tôi</strong></div>
+      <div style="padding:12px"><table><thead><tr><th>Mã</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+        <tr><td>SLF-20261111-0003</td><td><span class="badge s-doing">Chờ xác nhận</span></td><td><button class="btn secondary">Sửa thông tin nhận hàng</button> <button class="btn secondary">Huỷ đơn</button></td></tr>
+      </tbody></table>
+      <div class="grid-2" style="margin-top:8px"><input placeholder="Người nhận"><input placeholder="Số điện thoại"><input placeholder="Địa chỉ"><input placeholder="Ghi chú"></div>
+      </div>
+    </div>
+  </section>
+  <section id="func" hidden>
+    <div class="card"><h2>Định tuyến admin qua cổng FE</h2><table><thead><tr><th>Đường dẫn trên :3000</th><th>Đích</th></tr></thead><tbody>
+      <tr><td><code>/admin/*</code></td><td>BE <code>/admin/*</code></td></tr>
+      <tr><td><code>/be-static/*</code></td><td>BE <code>/be-static/*</code> (assetPrefix của BE)</td></tr>
+      <tr><td><code>/api/*</code></td><td>BE <code>/api/*</code></td></tr>
+    </tbody></table></div>
+    <div class="card"><h2>API mới / đổi</h2><table><thead><tr><th>Method</th><th>Path</th><th>Mô tả</th></tr></thead><tbody>
+      <tr><td>POST</td><td><code>/api/public/cart-prices</code></td><td>Giá thật theo danh sách món trong giỏ</td></tr>
+      <tr><td>GET/POST/PATCH</td><td><code>/api/orders</code>, <code>/api/inquiries</code></td><td>Không còn trả <code>adminNote</code></td></tr>
+    </tbody></table></div>
+  </section>
+  <section id="progress" hidden>
+    <div class="card next"><h2>Bước tiếp theo</h2><p id="next">— — CR-003 hoàn tất, chờ người dùng xem</p></div>
+    <div class="card" id="tasks"><h2>Task CR-002</h2><table><thead><tr><th>ID</th><th>Task</th><th>Trạng thái</th></tr></thead><tbody>
+<tr><td>T-002.1</td><td>(QA-01) Admin qua cổng FE</td><td><span class="badge s-done" id="tk-1">✅ DONE</span></td></tr>
+<tr><td>T-002.2</td><td>(QA-02) Không lộ adminNote</td><td><span class="badge s-done" id="tk-2">✅ DONE</span></td></tr>
+<tr><td>T-002.3</td><td>(QA-04, QA-05) Form admin combo/đặc sản</td><td><span class="badge s-done" id="tk-3">✅ DONE</span></td></tr>
+<tr><td>T-002.4</td><td>(QA-06, QA-07) Giá lệch</td><td><span class="badge s-done" id="tk-4">✅ DONE</span></td></tr>
+<tr><td>T-002.5</td><td>(QA-15, QA-13) Vỡ dấu, validate, điều hướng</td><td><span class="badge s-done" id="tk-5">✅ DONE</span></td></tr>
+<tr><td>T-002.6</td><td>(QA-03) Ưu tiên ngôn ngữ thủ công</td><td><span class="badge s-done" id="tk-6">✅ DONE</span></td></tr>
+<tr><td>T-002.7</td><td>(QA-08, QA-09) Link đặc sản + sửa đơn pending</td><td><span class="badge s-done" id="tk-7">✅ DONE</span></td></tr>
+<tr><td>T-002.8</td><td>(QA-11, QA-12) i18n + SEO</td><td><span class="badge s-done" id="tk-8">✅ DONE</span></td></tr>
+<tr><td>T-002.9</td><td>(QA-10, QA-14) Ảnh dự phòng + nội dung</td><td><span class="badge s-done" id="tk-9">✅ DONE</span></td></tr>
+<tr><td>T-002.10</td><td>Kiểm thử tổng thể + dọn dữ liệu</td><td><span class="badge s-done" id="tk-10">✅ DONE</span></td></tr>
+</tbody></table></div>
+    <div class="card" id="tasks-cr003"><h2>Task CR-003</h2><table><thead><tr><th>ID</th><th>Task</th><th>Trạng thái</th></tr></thead><tbody>
+<tr><td>T-003.1</td><td>Bản dịch EN/ZH không bắt buộc</td><td><span class="badge s-done" id="tk3-1">✅ DONE</span></td></tr>
+<tr><td>T-003.2</td><td>Metadata 4 trang theo ngôn ngữ</td><td><span class="badge s-done" id="tk3-2">✅ DONE</span></td></tr>
+<tr><td>T-003.3</td><td>Ảnh dự phòng &lt;img> admin</td><td><span class="badge s-done" id="tk3-3">✅ DONE</span></td></tr>
+<tr><td>T-003.4</td><td>Breadcrumb đơn admin = mã đơn</td><td><span class="badge s-done" id="tk3-4">✅ DONE</span></td></tr>
+<tr><td>T-003.5</td><td>Xoá AdminPanel.tsx</td><td><span class="badge s-done" id="tk3-5">✅ DONE</span></td></tr>
+<tr><td>T-003.6</td><td>Kiểm thử tổng thể + dọn dữ liệu</td><td><span class="badge s-done" id="tk3-6">✅ DONE</span></td></tr>
+</tbody></table></div>
+  </section>
+</main>
+<script>
+  const tabs = document.querySelectorAll('nav [role="tab"]');
+  function show(id) {
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === id)));
+    document.querySelectorAll('main > section').forEach(s => { s.hidden = s.id !== id; });
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+  if (location.hash && document.getElementById(location.hash.slice(1))) show(location.hash.slice(1));
+</script>
+</body>
+</html>
