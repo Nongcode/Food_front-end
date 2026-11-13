@@ -48,3 +48,4 @@ Không đổi. `index.html` mô tả cấu trúc repo và tiến độ.
 | T-001.3 | `package.json`, `scripts/dev.mjs`, `README.md`, `frontend/.env.example`, `backend/.env.example` | Lệnh chung `npm --prefix`; dev.mjs spawn 2 dev server, taskkill /T trên Windows | Không thêm thư viện |
 | T-001.4 | `CLAUDE.md` (mục Cấu trúc repo + Lệnh kiểm tra), `AGENTS.md`, `docs/features/README.md:5`, `frontend/CLAUDE.md` | Chuyển tài liệu lên gốc | Một nơi duy nhất cho quy trình |
 | T-001.5 | `package.json` (`install:all`) | `npm --prefix X install` → `cd X && npm install` | --prefix làm npm thêm package gốc vào dependencies + viết lại lockfile |
+| Git | lịch sử `backend/` | Xoá `test-pass.ts`, `get-users.js`, `query-admins.ts` khỏi mọi commit; remote origin = Food_front-end | Không đưa hash mật khẩu admin lên GitHub |

@@ -11,9 +11,9 @@
 | Yêu cầu đang làm | CR-001 — Gộp FE + BE thành monorepo (cách A) |
 | Bước Superpowers | Không áp dụng đủ chuỗi (thay đổi cấu trúc repo, không thêm màn hình/API/model) |
 | Task đang làm | T-001.6 |
-| **Bước tiếp theo** | T-001.6 — chốt, cập nhật README, bàn giao |
-| Branch | FE/BE `feature/tai-khoan-don-hang` → `main`; repo mới `D:\Duc-TPE\sonla-food` nhánh `main` |
-| Cập nhật lần cuối | 2026-11-13 14:43 |
+| **Bước tiếp theo** | Không còn việc git. Người dùng: kiểm admin xác nhận đơn; cân nhắc đổi tên repo GitHub; T15 deploy |
+| Branch | `main` → origin `Nongcode/Food_front-end` (monorepo) |
+| Cập nhật lần cuối | 2026-11-13 14:59 |
 | Ghi chú dở dang | Từ T-001.4, tài liệu này nằm ở D:/Duc-TPE/sonla-food/docs/features/tich-hop/gop-monorepo (bản trong sonla-food-frontend là cũ) |
 
 ## File chính
@@ -52,3 +52,4 @@
 - 2026-11-13 14:26 — T-001.4 ✅: docs/features + CLAUDE.md lên gốc monorepo; AGENTS.md gốc; memory chép sang project mới.
 - 2026-11-13 14:43 — T-001.5 ✅: cài + kiểm thử trong monorepo; sửa script install:all; dọn dữ liệu test.
 - 2026-11-13 14:44 — T-001.6 ✅: CR-001 DONE. Repo D:/Duc-TPE/sonla-food sẵn sàng; chưa có remote.
+- 2026-11-13 14:59 — Git: phát hiện backend/test-pass.ts chứa hash mật khẩu admin (hau, admin) trong lịch sử BE → theo lựa chọn người dùng, git filter-branch xoá test-pass.ts, get-users.js, query-admins.ts khỏi toàn bộ lịch sử (chỉ commit phía BE đổi hash; FE giữ nguyên). Thêm remote origin = Nongcode/Food_front-end, push main fast-forward a32c82c..8145297. Repo BE cũ (local) vẫn còn các file này.
