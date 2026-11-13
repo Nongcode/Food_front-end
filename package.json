@@ -1,0 +1,17 @@
+{
+  "name": "sonla-food",
+  "private": true,
+  "description": "Sơn La Food — monorepo gồm frontend (Next.js :3000) và backend (Next.js + Prisma :3001)",
+  "scripts": {
+    "install:all": "npm --prefix frontend install && npm --prefix backend install",
+    "dev": "node scripts/dev.mjs",
+    "dev:fe": "npm --prefix frontend run dev",
+    "dev:be": "npm --prefix backend run dev",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "build:fe": "npm --prefix frontend run build",
+    "build:be": "npm --prefix backend run build",
+    "lint": "npm --prefix frontend run lint && npm --prefix backend run lint",
+    "typecheck": "cd frontend && npx tsc --noEmit && cd ../backend && npx tsc --noEmit",
+    "test": "npm --prefix backend run test:unit && npm --prefix backend run test:api"
+  }
+}
