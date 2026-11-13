@@ -47,3 +47,4 @@ Không đổi. `index.html` mô tả cấu trúc repo và tiến độ.
 | T-001.2 | `D:/Duc-TPE/sonla-food` (.gitignore gốc, frontend/, backend/) | Repo mới, lịch sử 2 repo qua git mv + pull --allow-unrelated-histories | Giữ blame/log qua mốc gộp |
 | T-001.3 | `package.json`, `scripts/dev.mjs`, `README.md`, `frontend/.env.example`, `backend/.env.example` | Lệnh chung `npm --prefix`; dev.mjs spawn 2 dev server, taskkill /T trên Windows | Không thêm thư viện |
 | T-001.4 | `CLAUDE.md` (mục Cấu trúc repo + Lệnh kiểm tra), `AGENTS.md`, `docs/features/README.md:5`, `frontend/CLAUDE.md` | Chuyển tài liệu lên gốc | Một nơi duy nhất cho quy trình |
+| T-001.5 | `package.json` (`install:all`) | `npm --prefix X install` → `cd X && npm install` | --prefix làm npm thêm package gốc vào dependencies + viết lại lockfile |

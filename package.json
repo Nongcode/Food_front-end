@@ -3,7 +3,7 @@
   "private": true,
   "description": "Sơn La Food — monorepo gồm frontend (Next.js :3000) và backend (Next.js + Prisma :3001)",
   "scripts": {
-    "install:all": "npm --prefix frontend install && npm --prefix backend install",
+    "install:all": "cd frontend && npm install && cd ../backend && npm install",
     "dev": "node scripts/dev.mjs",
     "dev:fe": "npm --prefix frontend run dev",
     "dev:be": "npm --prefix backend run dev",
