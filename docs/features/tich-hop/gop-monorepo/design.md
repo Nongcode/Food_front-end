@@ -43,3 +43,4 @@ Không đổi. `index.html` mô tả cấu trúc repo và tiến độ.
 
 | Task | File:dòng | Thay đổi | Lý do |
 |---|---|---|---|
+| T-001.1 | FE commit 7aa017a, b310641 | Commit code + docs; `main` FE/BE fast-forward tới feature | Gộp từ `main` theo lựa chọn của người dùng |

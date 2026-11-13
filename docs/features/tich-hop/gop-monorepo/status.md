@@ -10,10 +10,10 @@
 | Trạng thái | 🟡 IN_PROGRESS |
 | Yêu cầu đang làm | CR-001 — Gộp FE + BE thành monorepo (cách A) |
 | Bước Superpowers | Không áp dụng đủ chuỗi (thay đổi cấu trúc repo, không thêm màn hình/API/model) |
-| Task đang làm | T-001.1 |
-| **Bước tiếp theo** | T-001.1 — commit FE trên `feature/tai-khoan-don-hang`, merge ff vào `main` ở FE và BE |
+| Task đang làm | T-001.2 |
+| **Bước tiếp theo** | T-001.2 — clone tạm FE/BE, git mv vào frontend/ backend/, pull vào D:Duc-TPEsonla-food |
 | Branch | FE/BE `feature/tai-khoan-don-hang` → `main`; repo mới `D:\Duc-TPE\sonla-food` nhánh `main` |
-| Cập nhật lần cuối | 2026-11-13 14:20 |
+| Cập nhật lần cuối | 2026-11-13 14:24 |
 | Ghi chú dở dang | Plan đã duyệt 2026-11-13. Sau T-001.4, folder này nằm ở `D:\Duc-TPE\sonla-food\docs\features\tich-hop\gop-monorepo\` |
 
 ## File chính
@@ -30,7 +30,7 @@
 
 | ID | Task | Trạng thái | Test | Ghi chú |
 |---|---|---|---|---|
-| T-001.1 | Commit FE + merge feature → main ở FE, BE | 🔄 DOING | | |
+| T-001.1 | Commit FE + merge feature → main ở FE, BE | ✅ DONE | Bỏ qua Playwright: chỉ commit/merge, không đổi code (đã test ở T-003.6). FE `npx tsc --noEmit` trên main sạch; git status FE/BE sạch | FE 7aa017a (code) + b310641 (docs), main ff → b310641; BE main ff → 15437d3. Không push |
 | T-001.2 | Tạo repo `sonla-food` giữ lịch sử | ⬜ TODO | | |
 | T-001.3 | `package.json` gốc + `scripts/dev.mjs` + README | ⬜ TODO | | |
 | T-001.4 | Chuyển `CLAUDE.md` + `docs/features` lên gốc | ⬜ TODO | | |
@@ -45,3 +45,4 @@
 ## Nhật ký phiên
 
 - 2026-11-13 14:20 — Khảo sát 2 repo (cùng Next 16.2.6/React 19.2.4; BE không có remote; FE remote `Nongcode/Food_front-end`; main là tổ tiên của feature ở cả hai). Người dùng chốt: thư mục mới, commit + merge main, không workspaces. Lập plan CR-001.
+- 2026-11-13 14:24 — T-001.1 ✅: FE commit 7aa017a + b310641, main FE/BE fast-forward. Không push.
