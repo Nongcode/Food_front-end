@@ -1,145 +1,130 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { CART_UPDATED_EVENT, readCartItems, writeCartItems, type StoredCartItem } from "./cartStorage";
+import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { parseCartItems, readCartSnapshot, subscribeCart, writeCartItems, type StoredCartItem } from "./cartStorage";
+import { markCustomerSignedOut, useCurrentCustomer } from "@/lib/customerSession";
+import {
+  ApiError,
+  DEFAULT_PACKING_FEE,
+  cartQuoteKey,
+  fetchCartPrices,
+  fetchMyOrders,
+  fetchPackingFee,
+  formatVnd,
+  submitOrder,
+  type CartQuote,
+  type CustomerOrder,
+} from "@/lib/customerOrders";
+import { OrderHistoryList } from "./OrderHistoryList";
 import { useI18n } from "./I18nProvider";
-
-const ORDER_HISTORY_STORAGE_KEY = "sonla-food-order-history-v1";
-const ORDER_STATUS_REQUESTED = "Đã yêu cầu đặt hàng";
-const ORDER_STATUS_CANCELLED = "Đã hủy yêu cầu";
+import { backgroundWithFallback } from "@/lib/imageFallback";
 
 type CartTab = "cart" | "history";
-type OrderRequestStatus = typeof ORDER_STATUS_REQUESTED | typeof ORDER_STATUS_CANCELLED | string;
 
-type StoredOrderRequest = {
-  id: string;
-  createdAt: string;
-  status: OrderRequestStatus;
-  customer: {
-    name: string;
-    phone: string;
-    email: string;
-    address: string;
-    note: string;
-  };
-  items: StoredCartItem[];
-  cancelReason?: string;
-  canceledAt?: string;
-  totals: {
-    subtotal: number;
-    packingFee: number;
-    estimatedTotal: number;
-    totalQuantity: number;
-  };
-};
-
-const currencyFormatter = new Intl.NumberFormat("vi-VN", {
-  style: "currency",
-  currency: "VND",
-  maximumFractionDigits: 0,
-});
-
-const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
-
-function formatCurrency(value: number) {
-  return currencyFormatter.format(value).replace("₫", "đ");
-}
-
-function displayPrice(item: StoredCartItem) {
-  return item.price > 0 ? formatCurrency(item.price) : item.priceText;
-}
-
-function canUseStorage() {
-  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
-}
-
-function readOrderHistory(): StoredOrderRequest[] {
-  if (!canUseStorage()) return [];
-
-  try {
-    const rawValue = window.localStorage.getItem(ORDER_HISTORY_STORAGE_KEY);
-    if (!rawValue) return [];
-
-    const parsed = JSON.parse(rawValue);
-    if (!Array.isArray(parsed)) return [];
-
-    return parsed.filter((order): order is StoredOrderRequest => Boolean(order?.id && order?.createdAt && order?.items));
-  } catch {
-    return [];
-  }
-}
-
-function writeOrderHistory(orders: StoredOrderRequest[]) {
-  if (!canUseStorage()) return;
-  window.localStorage.setItem(ORDER_HISTORY_STORAGE_KEY, JSON.stringify(orders));
-}
-
-function createOrderCode(date = new Date()) {
-  const datePart = date.toISOString().slice(0, 10).replace(/-/g, "");
-  const randomPart = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `SLF-${datePart}-${randomPart}`;
-}
-
-function buildOrderNotes(items: StoredCartItem[], address: string, customerNote: string, estimatedTotal: number) {
-  const itemLines = items.map((item, index) => {
-    const lineTotal = item.price > 0 ? ` - Tạm tính: ${formatCurrency(item.price * item.quantity)}` : "";
-    return `${index + 1}. ${item.name} x ${item.quantity} (${displayPrice(item)})${lineTotal}`;
-  });
-
-  return [
-    `Địa chỉ nhận hàng: ${address}`,
-    `Tổng dự kiến: ${formatCurrency(estimatedTotal)}`,
-    "Danh sách sản phẩm:",
-    ...itemLines,
-    customerNote ? `Ghi chú khách hàng: ${customerNote}` : "Ghi chú khách hàng: Không có",
-  ].join("\n");
+function formatUnitPrice(price: number, unit?: string | null) {
+  return unit ? `${formatVnd(price)}/${unit}` : formatVnd(price);
 }
 
 export function CartClient() {
-  const { href } = useI18n();
-  const [items, setItems] = useState<StoredCartItem[]>([]);
-  const [orderHistory, setOrderHistory] = useState<StoredOrderRequest[]>([]);
+  const router = useRouter();
+  const { href, t } = useI18n();
+  const cartSnapshot = useSyncExternalStore(subscribeCart, readCartSnapshot, () => "");
+  const items = useMemo(() => parseCartItems(cartSnapshot), [cartSnapshot]);
   const [activeTab, setActiveTab] = useState<CartTab>("cart");
+  const [packingFee, setPackingFee] = useState(DEFAULT_PACKING_FEE);
+  const [quotes, setQuotes] = useState<Map<string, CartQuote> | null>(null);
+  const [priceNotice, setPriceNotice] = useState("");
+  const [orders, setOrders] = useState<CustomerOrder[] | null>(null);
+  const [ordersError, setOrdersError] = useState("");
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
-  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
-  const [cancelingOrderId, setCancelingOrderId] = useState<string | null>(null);
-  const [editOrderError, setEditOrderError] = useState("");
-  const [editOrderSuccess, setEditOrderSuccess] = useState(false);
-  const [cancelOrderError, setCancelOrderError] = useState("");
   const [orderError, setOrderError] = useState("");
-  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [submittedCode, setSubmittedCode] = useState("");
+  const [totalNotice, setTotalNotice] = useState("");
+  const { customer: currentUser, loading: customerLoading } = useCurrentCustomer();
+  const userId = currentUser?.id;
+
+  const contactPriceLabel = t("cart", "price_contact", "Giá liên hệ");
 
   useEffect(() => {
-    setItems(readCartItems());
-    setOrderHistory(readOrderHistory());
-
-    function handleCartUpdated() {
-      setItems(readCartItems());
-    }
-
-    window.addEventListener(CART_UPDATED_EVENT, handleCartUpdated);
-    window.addEventListener("storage", handleCartUpdated);
-
+    let active = true;
+    fetchPackingFee().then((fee) => {
+      if (active) setPackingFee(fee);
+    });
     return () => {
-      window.removeEventListener(CART_UPDATED_EVENT, handleCartUpdated);
-      window.removeEventListener("storage", handleCartUpdated);
+      active = false;
     };
   }, []);
 
+  // Danh sách món (không gồm giá/số lượng) — chỉ hỏi lại giá khi món trong giỏ thay đổi
+  const itemKeys = useMemo(
+    () => [...new Set(items.map((item) => cartQuoteKey(item.type, item.slug)))].sort().join("|"),
+    [items],
+  );
+
+  // Giá trong localStorage chỉ để hiển thị nhanh; giá thật lấy từ BE mỗi khi mở giỏ
   useEffect(() => {
-    if (!isOrderModalOpen && !editingOrderId && !cancelingOrderId) return;
+    if (!itemKeys) return;
+    let active = true;
+    const requested = itemKeys.split("|").map((key) => {
+      const [itemType, ...slugParts] = key.split(":");
+      return { itemType: itemType as "package" | "specialty", slug: slugParts.join(":") };
+    });
+    fetchCartPrices(requested)
+      .then((result) => {
+        if (!active) return;
+        const map = new Map(result.map((quote) => [cartQuoteKey(quote.itemType, quote.slug), quote]));
+        setQuotes(map);
+
+        const current = parseCartItems(readCartSnapshot());
+        let changed = false;
+        const next = current.map((item) => {
+          const quote = map.get(cartQuoteKey(item.type, item.slug));
+          if (!quote || !quote.available) return item;
+          const price = quote.unitPrice ?? 0;
+          const priceText = quote.unitPrice !== null ? formatUnitPrice(quote.unitPrice, quote.unit) : "";
+          if (item.price === price && (!quote.name || item.name === quote.name)) return item;
+          changed = true;
+          return { ...item, price, priceText: priceText || item.priceText, name: quote.name || item.name };
+        });
+        if (changed) {
+          writeCartItems(next);
+          setPriceNotice(t("cart", "price_updated", "Giá một số sản phẩm đã thay đổi. Giỏ hàng đã cập nhật theo giá hiện tại của cửa hàng."));
+        }
+      })
+      .catch(() => {
+        if (active) setPriceNotice(t("cart", "price_check_failed", "Chưa kiểm tra được giá mới nhất. Tổng tiền cuối cùng do cửa hàng xác nhận."));
+      });
+    return () => {
+      active = false;
+    };
+  }, [itemKeys, t]);
+
+  // Lịch sử đơn lấy từ BE, chỉ khi đã đăng nhập
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    fetchMyOrders()
+      .then((orderList) => {
+        if (!active) return;
+        setOrders(orderList);
+        setOrdersError("");
+      })
+      .catch((caughtError) => {
+        if (active) setOrdersError(caughtError instanceof Error ? caughtError.message : t("cart", "orders_load_failed", "Chưa tải được đơn hàng."));
+      });
+    return () => {
+      active = false;
+    };
+  }, [userId, t]);
+
+  useEffect(() => {
+    if (!isOrderModalOpen) return;
 
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !isSubmittingOrder) {
-        setIsOrderModalOpen(false);
-        setEditingOrderId(null);
-        setCancelingOrderId(null);
-      }
+      if (event.key === "Escape" && !isSubmittingOrder) setIsOrderModalOpen(false);
     };
 
     document.body.style.overflow = "hidden";
@@ -149,28 +134,49 @@ export function CartClient() {
       document.body.style.overflow = "";
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [cancelingOrderId, editingOrderId, isOrderModalOpen, isSubmittingOrder]);
+  }, [isOrderModalOpen, isSubmittingOrder]);
+
+  function quoteOf(item: StoredCartItem) {
+    return quotes?.get(cartQuoteKey(item.type, item.slug));
+  }
+
+  // Món BE báo không còn bán: không tính tiền, phải xoá trước khi gửi đơn
+  function isUnavailable(item: StoredCartItem) {
+    return quoteOf(item)?.available === false;
+  }
+
+  function unitPriceOf(item: StoredCartItem) {
+    const quote = quoteOf(item);
+    if (quote) return quote.available ? quote.unitPrice ?? 0 : 0;
+    return item.price;
+  }
+
+  function displayPrice(item: StoredCartItem) {
+    if (isUnavailable(item)) return t("cart", "unavailable", "Không còn bán");
+    const quote = quoteOf(item);
+    const price = unitPriceOf(item);
+    return price > 0 ? formatUnitPrice(price, quote?.unit) : contactPriceLabel;
+  }
+
+  const unavailableItems = items.filter(isUnavailable);
 
   const totals = useMemo(() => {
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const packingFee = items.length > 0 ? 30000 : 0;
-    const estimatedTotal = subtotal + packingFee;
+    const priced = items.filter((item) => quotes?.get(cartQuoteKey(item.type, item.slug))?.available !== false);
+    const priceOf = (item: StoredCartItem) => {
+      const quote = quotes?.get(cartQuoteKey(item.type, item.slug));
+      return quote ? quote.unitPrice ?? 0 : item.price;
+    };
+    const subtotal = priced.reduce((sum, item) => sum + priceOf(item) * item.quantity, 0);
+    const fee = priced.length > 0 ? packingFee : 0;
+    const hasUnpricedItems = priced.some((item) => priceOf(item) <= 0);
 
-    return { subtotal, packingFee, estimatedTotal };
-  }, [items]);
+    return { subtotal, packingFee: fee, estimatedTotal: subtotal + fee, hasUnpricedItems };
+  }, [items, packingFee, quotes]);
 
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-  const editingOrder = useMemo(
-    () => orderHistory.find((order) => order.id === editingOrderId) || null,
-    [editingOrderId, orderHistory],
-  );
-  const cancelingOrder = useMemo(
-    () => orderHistory.find((order) => order.id === cancelingOrderId) || null,
-    [cancelingOrderId, orderHistory],
-  );
+  const unpricedSuffix = totals.hasUnpricedItems ? ` ${t("cart", "unpriced_suffix", "(chưa gồm món giá liên hệ)")}` : "";
 
   function updateCart(nextItems: StoredCartItem[]) {
-    setItems(nextItems);
     writeCartItems(nextItems);
   }
 
@@ -186,9 +192,18 @@ export function CartClient() {
     updateCart(items.filter((item) => item.id !== id));
   }
 
+  // Về trang đăng nhập rồi quay lại giỏ; giỏ vẫn nằm trong localStorage
+  function redirectToLogin() {
+    router.push(`${href("/dang-nhap")}?next=${encodeURIComponent(window.location.pathname)}`);
+  }
+
   function openOrderModal() {
+    if (customerLoading) return;
+    if (!currentUser) {
+      redirectToLogin();
+      return;
+    }
     setOrderError("");
-    setOrderSuccess(false);
     setIsOrderModalOpen(true);
   }
 
@@ -197,162 +212,58 @@ export function CartClient() {
     setIsOrderModalOpen(false);
   }
 
-  function openEditOrderModal(order: StoredOrderRequest) {
-    if (order.status !== ORDER_STATUS_REQUESTED) return;
-    setEditOrderError("");
-    setEditOrderSuccess(false);
-    setEditingOrderId(order.id);
-  }
-
-  function closeEditOrderModal() {
-    if (isSubmittingOrder) return;
-    setEditingOrderId(null);
-    setEditOrderError("");
-    setEditOrderSuccess(false);
-  }
-
-  function openCancelOrderModal(order: StoredOrderRequest) {
-    if (order.status !== ORDER_STATUS_REQUESTED) return;
-    setCancelOrderError("");
-    setCancelingOrderId(order.id);
-  }
-
-  function requestOrderAgain(order: StoredOrderRequest) {
-    if (order.status !== ORDER_STATUS_CANCELLED) return;
-
-    const nextHistory = orderHistory.map((historyOrder) =>
-      historyOrder.id === order.id
-        ? {
-            ...historyOrder,
-            status: ORDER_STATUS_REQUESTED,
-            cancelReason: undefined,
-            canceledAt: undefined,
-          }
-        : historyOrder,
-    );
-
-    setOrderHistory(nextHistory);
-    writeOrderHistory(nextHistory);
-  }
-
-  function closeCancelOrderModal() {
-    if (isSubmittingOrder) return;
-    setCancelingOrderId(null);
-    setCancelOrderError("");
-  }
-
-  function handleCancelOrderSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!cancelingOrder || cancelingOrder.status !== ORDER_STATUS_REQUESTED) {
-      setCancelOrderError("Yêu cầu này đã được xử lý nên không thể hủy từ giao diện khách hàng.");
-      return;
-    }
-
-    const formData = new FormData(event.currentTarget);
-    const reason = String(formData.get("cancelReason") || "").trim();
-
-    if (!reason) {
-      setCancelOrderError("Vui lòng nhập lý do hủy yêu cầu đặt hàng.");
-      return;
-    }
-
-    const nextHistory = orderHistory.map((order) =>
-      order.id === cancelingOrder.id
-        ? { ...order, status: ORDER_STATUS_CANCELLED, cancelReason: reason, canceledAt: new Date().toISOString() }
-        : order,
-    );
-
-    setOrderHistory(nextHistory);
-    writeOrderHistory(nextHistory);
-    setCancelingOrderId(null);
-    setCancelOrderError("");
-  }
-
-  function handleEditOrderSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!editingOrder || editingOrder.status !== ORDER_STATUS_REQUESTED) {
-      setEditOrderError("Yêu cầu này đã được xử lý nên không thể thay đổi thông tin nhận hàng.");
-      return;
-    }
-
-    const formData = new FormData(event.currentTarget);
-    const updatedCustomer = {
-      name: String(formData.get("name") || "").trim(),
-      phone: String(formData.get("phone") || "").trim(),
-      email: String(formData.get("email") || "").trim(),
-      address: String(formData.get("address") || "").trim(),
-      note: String(formData.get("notes") || "").trim(),
-    };
-
-    const nextHistory = orderHistory.map((order) =>
-      order.id === editingOrder.id ? { ...order, customer: updatedCustomer } : order,
-    );
-
-    setOrderHistory(nextHistory);
-    writeOrderHistory(nextHistory);
-    setEditOrderError("");
-    setEditOrderSuccess(true);
+  function handleOrderChanged(updated: CustomerOrder) {
+    setOrders((current) => current?.map((order) => (order.id === updated.id ? updated : order)) ?? current);
   }
 
   async function handleOrderSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isSubmittingOrder) return;
 
     if (items.length === 0) {
-      setOrderError("Giỏ hàng đang trống. Vui lòng chọn sản phẩm trước khi gửi yêu cầu.");
+      setOrderError(t("cart", "empty_error", "Giỏ hàng đang trống. Vui lòng chọn sản phẩm trước khi gửi yêu cầu."));
+      return;
+    }
+    if (unavailableItems.length > 0) {
+      setOrderError(t("cart", "remove_unavailable", "Vui lòng xoá sản phẩm không còn bán khỏi giỏ trước khi gửi đơn."));
       return;
     }
 
+    const formData = new FormData(event.currentTarget);
+    const shownTotal = totals.estimatedTotal;
     setIsSubmittingOrder(true);
     setOrderError("");
-    setOrderSuccess(false);
-
-    const formElement = event.currentTarget;
-    const formData = new FormData(formElement);
-    const name = String(formData.get("name") || "").trim();
-    const phone = String(formData.get("phone") || "").trim();
-    const email = String(formData.get("email") || "").trim();
-    const address = String(formData.get("address") || "").trim();
-    const customerNote = String(formData.get("notes") || "").trim();
-    const orderItems = items.map((item) => ({ ...item }));
-    const orderDate = new Date();
-    const orderTotals = {
-      subtotal: totals.subtotal,
-      packingFee: totals.packingFee,
-      estimatedTotal: totals.estimatedTotal,
-      totalQuantity,
-    };
-    const tourName = orderItems.map((item) => `${item.name} x ${item.quantity}`).join(", ");
-    const notes = buildOrderNotes(orderItems, address, customerNote, orderTotals.estimatedTotal);
-    const nextOrder: StoredOrderRequest = {
-      id: createOrderCode(orderDate),
-      createdAt: orderDate.toISOString(),
-      status: ORDER_STATUS_REQUESTED,
-      customer: { name, phone, email, address, note: customerNote },
-      items: orderItems,
-      totals: orderTotals,
-    };
 
     try {
-      const nextHistory = [nextOrder, ...orderHistory].slice(0, 30);
-      setOrderHistory(nextHistory);
-      writeOrderHistory(nextHistory);
-      updateCart([]);
-      setActiveTab("history");
-      setOrderSuccess(true);
-      formElement.reset();
-
-      fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, tourName, notes }),
-      }).catch((error) => {
-        console.warn("Order request saved locally but API sync failed", error);
+      const order = await submitOrder({
+        items: items.map((item) => ({ itemType: item.type, slug: item.slug, quantity: item.quantity })),
+        receiverName: String(formData.get("name") || "").trim(),
+        phone: String(formData.get("phone") || "").trim(),
+        email: String(formData.get("email") || "").trim(),
+        address: String(formData.get("address") || "").trim(),
+        note: String(formData.get("notes") || "").trim(),
       });
-    } catch (error) {
-      console.error(error);
-      setOrderError("Chưa lưu được yêu cầu. Vui lòng thử lại hoặc liên hệ trực tiếp với Sơn La Food.");
+      updateCart([]);
+      setOrders((current) => [order, ...(current ?? [])]);
+      setSubmittedCode(order.code);
+      // BE tự tính lại tổng; báo khách nếu khác tổng vừa hiện trong giỏ
+      setTotalNotice(
+        order.total !== shownTotal
+          ? t("cart", "total_changed", "Tổng do cửa hàng tính là {server}, khác tổng hiển thị trong giỏ ({shown}) vì giá vừa thay đổi.")
+              .replace("{server}", formatVnd(order.total))
+              .replace("{shown}", formatVnd(shownTotal))
+          : "",
+      );
+      setIsOrderModalOpen(false);
+      setActiveTab("history");
+    } catch (caughtError) {
+      if (caughtError instanceof ApiError && caughtError.status === 401) {
+        markCustomerSignedOut();
+        setIsOrderModalOpen(false);
+        redirectToLogin();
+        return;
+      }
+      setOrderError(caughtError instanceof Error ? caughtError.message : t("cart", "submit_failed", "Chưa gửi được đơn. Vui lòng thử lại."));
     } finally {
       setIsSubmittingOrder(false);
     }
@@ -360,7 +271,7 @@ export function CartClient() {
 
   return (
     <section className="cart-shell">
-      <div className="cart-tabs" role="tablist" aria-label="Giỏ hàng và lịch sử đặt hàng">
+      <div className="cart-tabs" role="tablist" aria-label={t("cart", "tabs_label", "Giỏ hàng và lịch sử đặt hàng")}>
         <button
           type="button"
           role="tab"
@@ -368,7 +279,7 @@ export function CartClient() {
           className={activeTab === "cart" ? "active" : ""}
           onClick={() => setActiveTab("cart")}
         >
-          Giỏ hàng hiện tại
+          {t("cart", "tab_cart", "Giỏ hàng hiện tại")}
           {totalQuantity > 0 ? <span>{totalQuantity}</span> : null}
         </button>
         <button
@@ -378,27 +289,32 @@ export function CartClient() {
           className={activeTab === "history" ? "active" : ""}
           onClick={() => setActiveTab("history")}
         >
-          Lịch sử yêu cầu
-          {orderHistory.length > 0 ? <span>{orderHistory.length}</span> : null}
+          {t("cart", "tab_orders", "Đơn hàng của tôi")}
+          {orders && orders.length > 0 ? <span>{orders.length}</span> : null}
         </button>
       </div>
 
       {activeTab === "cart" ? (
         <div className="cart-layout">
-          <section className="cart-items" aria-label="Danh sách sản phẩm trong giỏ hàng">
+          <section className="cart-items" aria-label={t("cart", "items_label", "Danh sách sản phẩm trong giỏ hàng")}>
             <div className="cart-list-heading">
               <div>
-                <span>{totalQuantity} sản phẩm</span>
-                <h2>Sản phẩm đã chọn</h2>
+                <span>{totalQuantity} {t("cart", "products_suffix", "sản phẩm")}</span>
+                <h2>{t("cart", "selected_heading", "Sản phẩm đã chọn")}</h2>
               </div>
-              <Link href={href("/combo-dac-san")}>Mua thêm</Link>
+              <Link href={href("/combo-dac-san")}>{t("cart", "shop_more", "Mua thêm")}</Link>
             </div>
+
+            {priceNotice && items.length > 0 ? <p className="order-form-error cart-price-notice" role="status">{priceNotice}</p> : null}
+            {unavailableItems.length > 0 ? (
+              <p className="order-form-error" role="alert">{t("cart", "remove_unavailable", "Vui lòng xoá sản phẩm không còn bán khỏi giỏ trước khi gửi đơn.")}</p>
+            ) : null}
 
             {items.length > 0 ? (
               <div className="cart-list">
                 {items.map((item) => (
-                  <article className="cart-item" key={item.id}>
-                    <div className="cart-item-image" style={{ backgroundImage: `url(${item.image})` }} />
+                  <article className={`cart-item${isUnavailable(item) ? " is-unavailable" : ""}`} key={item.id}>
+                    <div className="cart-item-image" style={{ backgroundImage: backgroundWithFallback(item.image) }} />
                     <div className="cart-item-body">
                       <div className="cart-item-main">
                         <p>{item.seller}</p>
@@ -407,12 +323,12 @@ export function CartClient() {
                       </div>
                       <div className="cart-item-actions">
                         <strong>{displayPrice(item)}</strong>
-                        <div className="cart-quantity" aria-label={`Số lượng ${item.name}`}>
-                          <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Giảm số lượng">-</button>
+                        <div className="cart-quantity" aria-label={`${t("cart", "quantity_of", "Số lượng")} ${item.name}`}>
+                          <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={t("cart", "decrease", "Giảm số lượng")}>-</button>
                           <span>{item.quantity}</span>
-                          <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label="Tăng số lượng">+</button>
+                          <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={t("cart", "increase", "Tăng số lượng")}>+</button>
                         </div>
-                        <button type="button" className="cart-remove" onClick={() => removeItem(item.id)}>Xóa</button>
+                        <button type="button" className="cart-remove" onClick={() => removeItem(item.id)}>{t("cart", "remove", "Xóa")}</button>
                       </div>
                     </div>
                   </article>
@@ -420,241 +336,113 @@ export function CartClient() {
               </div>
             ) : (
               <div className="cart-empty">
-                <h2>Giỏ hàng đang trống</h2>
-                <p>Hãy chọn vài combo đặc sản hoặc sản phẩm tiêu biểu để bắt đầu tạo đơn.</p>
-                <Link href={href("/combo-dac-san")}>Khám phá đặc sản</Link>
+                <h2>{t("cart", "empty_title", "Giỏ hàng đang trống")}</h2>
+                <p>{t("cart", "empty_copy", "Hãy chọn vài combo đặc sản hoặc sản phẩm tiêu biểu để bắt đầu tạo đơn.")}</p>
+                <Link href={href("/combo-dac-san")}>{t("cart", "explore", "Khám phá đặc sản")}</Link>
               </div>
             )}
           </section>
 
-          <aside className="cart-summary" aria-label="Tóm tắt giỏ hàng">
-            <span className="summary-kicker">Tóm tắt đơn</span>
-            <h2>Dự kiến thanh toán</h2>
+          <aside className="cart-summary" aria-label={t("cart", "summary_label", "Tóm tắt giỏ hàng")}>
+            <span className="summary-kicker">{t("cart", "summary_kicker", "Tóm tắt đơn")}</span>
+            <h2>{t("cart", "summary_title", "Dự kiến thanh toán")}</h2>
             <div className="summary-lines">
-              <div><span>Tạm tính</span><strong>{formatCurrency(totals.subtotal)}</strong></div>
-              <div><span>Đóng gói / bảo quản</span><strong>{formatCurrency(totals.packingFee)}</strong></div>
-              <div className="summary-total"><span>Tổng dự kiến</span><strong>{formatCurrency(totals.estimatedTotal)}</strong></div>
+              <div><span>{t("cart", "subtotal", "Tạm tính")}</span><strong>{formatVnd(totals.subtotal)}</strong></div>
+              <div><span>{t("cart", "packing_fee", "Đóng gói / bảo quản")}</span><strong>{formatVnd(totals.packingFee)}</strong></div>
+              <div className="summary-total"><span>{t("cart", "estimated_total", "Tổng dự kiến")}{unpricedSuffix}</span><strong>{formatVnd(totals.estimatedTotal)}</strong></div>
             </div>
-            <p>Giá cuối cùng sẽ được xác nhận theo mùa vụ, tồn kho và địa chỉ nhận hàng.</p>
-            <button className="cart-checkout" type="button" onClick={openOrderModal} disabled={items.length === 0}>Gửi yêu cầu đặt hàng</button>
-            <Link className="cart-secondary" href={href("/dac-san")}>Xem sản phẩm đặc sản</Link>
+            <p>{t("cart", "summary_note", "Giá cuối cùng sẽ được xác nhận theo mùa vụ, tồn kho và địa chỉ nhận hàng.")}</p>
+            <button className="cart-checkout" type="button" onClick={openOrderModal} disabled={items.length === 0 || customerLoading || unavailableItems.length > 0}>{t("cart", "checkout", "Gửi yêu cầu đặt hàng")}</button>
+            <Link className="cart-secondary" href={href("/dac-san")}>{t("cart", "view_specialties", "Xem sản phẩm đặc sản")}</Link>
           </aside>
         </div>
       ) : (
-        <section className="order-history-panel" aria-label="Lịch sử yêu cầu đặt hàng">
+        <section className="order-history-panel" aria-label={t("cart", "tab_orders", "Đơn hàng của tôi")}>
           <div className="cart-list-heading order-history-heading">
             <div>
-              <span>{orderHistory.length} yêu cầu</span>
-              <h2>Lịch sử đặt hàng</h2>
+              <span>{orders?.length ?? 0} {t("cart", "orders_suffix", "đơn")}</span>
+              <h2>{t("cart", "tab_orders", "Đơn hàng của tôi")}</h2>
             </div>
-            <button type="button" onClick={() => setActiveTab("cart")}>Quay lại giỏ hàng</button>
+            <button type="button" onClick={() => setActiveTab("cart")}>{t("cart", "back_to_cart", "Quay lại giỏ hàng")}</button>
           </div>
 
-          {orderHistory.length > 0 ? (
-            <div className="order-history-list">
-              {orderHistory.map((order) => (
-                <article className="order-history-card" key={order.id}>
-                  <div className="order-history-topline">
-                    <div>
-                      <span className="order-code">{order.id}</span>
-                      <h3>{order.customer.name}</h3>
-                      <p>{dateFormatter.format(new Date(order.createdAt))}</p>
-                    </div>
-                    <div className="order-history-actions">
-                      <span className="order-status-pill">{order.status}</span>
-                      {order.status === ORDER_STATUS_REQUESTED ? (
-                        <>
-                          <button type="button" className="order-edit-button" onClick={() => openEditOrderModal(order)}>
-                            Sửa thông tin nhận hàng
-                          </button>
-                          <button type="button" className="order-cancel-button" onClick={() => openCancelOrderModal(order)}>
-                            Hủy yêu cầu
-                          </button>
-                        </>
-                      ) : null}
-                      {order.status === ORDER_STATUS_CANCELLED ? (
-                        <button type="button" className="order-buy-again-button" onClick={() => requestOrderAgain(order)}>
-                          Mua lại
-                        </button>
-                      ) : null}
-                    </div>
-                  </div>
+          {submittedCode ? (
+            <p className="order-form-success" role="status">
+              {t("cart", "submitted", "Đã gửi đơn {code}. Nhân viên sẽ liên hệ xác nhận sớm.").replace("{code}", submittedCode)}{" "}
+              <Link href={href("/tai-khoan")}>{t("cart", "view_in_account", "Xem trong tài khoản")}</Link>
+            </p>
+          ) : null}
+          {totalNotice ? <p className="order-form-error" role="alert">{totalNotice}</p> : null}
 
-                  <div className="order-history-products">
-                    {order.items.map((item) => (
-                      <div className="order-history-product" key={`${order.id}-${item.id}`}>
-                        <div className="order-history-image" style={{ backgroundImage: `url(${item.image})` }} />
-                        <div>
-                          <strong>{item.name}</strong>
-                          <span>{item.quantity} x {displayPrice(item)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="order-history-meta">
-                    <div><span>Số điện thoại</span><strong>{order.customer.phone}</strong></div>
-                    <div><span>Địa chỉ</span><strong>{order.customer.address}</strong></div>
-                    <div><span>Tổng sản phẩm</span><strong>{order.totals.totalQuantity}</strong></div>
-                    <div><span>Tổng dự kiến</span><strong>{formatCurrency(order.totals.estimatedTotal)}</strong></div>
-                  </div>
-
-                  {order.customer.note ? <p className="order-history-note">Ghi chú: {order.customer.note}</p> : null}
-                  {order.cancelReason ? <p className="order-history-note order-cancel-reason">Lý do hủy: {order.cancelReason}</p> : null}
-                </article>
-              ))}
-            </div>
-          ) : (
+          {!customerLoading && !currentUser ? (
             <div className="cart-empty order-history-empty">
-              <h2>Chưa có yêu cầu đặt hàng</h2>
-              <p>Sau khi gửi yêu cầu thành công, đơn demo sẽ tự động xuất hiện tại đây với trạng thái đã yêu cầu đặt hàng.</p>
-              <button type="button" onClick={() => setActiveTab("cart")}>Xem giỏ hàng hiện tại</button>
+              <h2>{t("cart", "login_to_view", "Đăng nhập để xem đơn hàng")}</h2>
+              <p>{t("cart", "login_to_view_copy", "Đơn bạn đã gửi được lưu theo tài khoản và hiện ở đây cùng trạng thái xử lý.")}</p>
+              <button type="button" onClick={redirectToLogin}>{t("cart", "login", "Đăng nhập")}</button>
             </div>
-          )}
+          ) : null}
+
+          {currentUser && ordersError ? <p className="order-form-error">{ordersError}</p> : null}
+          {currentUser && orders === null && !ordersError ? <div className="profile-card skeleton" /> : null}
+          {currentUser && orders && orders.length > 0 ? <OrderHistoryList orders={orders} onChanged={handleOrderChanged} /> : null}
+          {currentUser && orders && orders.length === 0 ? (
+            <div className="cart-empty order-history-empty">
+              <h2>{t("cart", "no_orders", "Chưa có đơn hàng")}</h2>
+              <p>{t("cart", "no_orders_copy", "Sau khi gửi yêu cầu thành công, đơn sẽ xuất hiện tại đây với trạng thái chờ xác nhận.")}</p>
+              <button type="button" onClick={() => setActiveTab("cart")}>{t("cart", "view_current_cart", "Xem giỏ hàng hiện tại")}</button>
+            </div>
+          ) : null}
         </section>
       )}
 
-      {cancelingOrder ? (
-        <div className="order-modal-backdrop" role="presentation" onMouseDown={closeCancelOrderModal}>
-          <div className="order-modal order-cancel-modal" role="dialog" aria-modal="true" aria-labelledby="cancel-order-modal-title" onMouseDown={(event) => event.stopPropagation()}>
-            <button className="order-modal-close" type="button" aria-label="Đóng form hủy yêu cầu" onClick={closeCancelOrderModal}>×</button>
-            <form className="order-request-form" onSubmit={handleCancelOrderSubmit}>
+      {isOrderModalOpen && currentUser ? (
+        <div className="order-modal-backdrop" role="presentation" onMouseDown={closeOrderModal}>
+          <div className="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title" onMouseDown={(event) => event.stopPropagation()}>
+            <button className="order-modal-close" type="button" aria-label={t("cart", "close_form", "Đóng form đặt hàng")} onClick={closeOrderModal}>×</button>
+
+            <form className="order-request-form" key={currentUser.id} onSubmit={handleOrderSubmit}>
               <div className="order-modal-heading">
-                <span>Hủy yêu cầu đặt hàng</span>
-                <h2 id="cancel-order-modal-title">Nhập lý do hủy yêu cầu {cancelingOrder.id}</h2>
-                <p>Yêu cầu chỉ có thể hủy khi còn ở trạng thái đã yêu cầu đặt hàng. Sau khi đơn được xử lý, thao tác hủy sẽ bị khóa.</p>
-              </div>
-
-              <div className="order-modal-cart-summary">
-                <strong>{cancelingOrder.totals.totalQuantity} sản phẩm trong yêu cầu</strong>
-                <span>Trạng thái: {cancelingOrder.status}</span>
-              </div>
-
-              <label>
-                Lý do hủy *
-                <textarea name="cancelReason" rows={5} placeholder="Ví dụ: muốn đổi địa chỉ nhận hàng, chọn lại sản phẩm, đặt nhầm số lượng..." required />
-              </label>
-
-              {cancelOrderError ? <p className="order-form-error" role="alert">{cancelOrderError}</p> : null}
-
-              <div className="order-modal-actions">
-                <button type="button" className="order-modal-secondary" onClick={closeCancelOrderModal}>Quay lại</button>
-                <button type="submit" className="order-modal-submit order-cancel-submit">Xác nhận hủy</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
-
-      {editingOrder ? (
-        <div className="order-modal-backdrop" role="presentation" onMouseDown={closeEditOrderModal}>
-          <div className="order-modal order-edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-order-modal-title" onMouseDown={(event) => event.stopPropagation()}>
-            <button className="order-modal-close" type="button" aria-label="Đóng form sửa thông tin nhận hàng" onClick={closeEditOrderModal}>×</button>
-            <form className="order-request-form" onSubmit={handleEditOrderSubmit}>
-              <div className="order-modal-heading">
-                <span>Chỉnh sửa thông tin nhận hàng</span>
-                <h2 id="edit-order-modal-title">Cập nhật yêu cầu {editingOrder.id}</h2>
-                <p>Khách hàng chỉ có thể sửa khi yêu cầu còn ở trạng thái đã yêu cầu đặt hàng. Khi đơn được xử lý, thao tác này sẽ tự động bị khóa.</p>
+                <span>{t("cart", "form_kicker", "Thông tin đặt hàng")}</span>
+                <h2 id="order-modal-title">{t("cart", "form_title", "Xác nhận yêu cầu đặt hàng")}</h2>
+                <p>{t("cart", "form_copy", "Vui lòng kiểm tra thông tin nhận hàng. Form đã tự điền theo tài khoản của bạn.")}</p>
               </div>
 
               <div className="order-form-grid">
                 <label>
-                  Họ và tên *
-                  <input name="name" type="text" defaultValue={editingOrder.customer.name} required />
+                  {t("cart", "field_name", "Họ và tên")} *
+                  <input name="name" type="text" defaultValue={currentUser.name} placeholder={t("form", "name_placeholder", "Nguyễn Minh Anh")} required maxLength={120} />
                 </label>
                 <label>
-                  Số điện thoại *
-                  <input name="phone" type="tel" defaultValue={editingOrder.customer.phone} required />
+                  {t("cart", "field_phone", "Số điện thoại")} *
+                  <input name="phone" type="tel" defaultValue={currentUser.phone} placeholder="09xx xxx xxx" required />
                 </label>
                 <label>
-                  Email *
-                  <input name="email" type="email" defaultValue={editingOrder.customer.email} required />
+                  Email
+                  <input name="email" type="email" defaultValue={currentUser.email} placeholder="email@example.com" />
                 </label>
                 <label>
-                  Địa chỉ nhận hàng *
-                  <input name="address" type="text" defaultValue={editingOrder.customer.address} required />
+                  {t("cart", "field_address", "Địa chỉ nhận hàng")} *
+                  <input name="address" type="text" defaultValue={currentUser.address || ""} placeholder={t("cart", "field_address_placeholder", "Số nhà, phường/xã, tỉnh/thành")} required maxLength={500} />
                 </label>
               </div>
 
               <label>
-                Ghi chú thêm
-                <textarea name="notes" rows={4} defaultValue={editingOrder.customer.note} placeholder="Ví dụ: đổi giờ nhận hàng, bổ sung người nhận, cần gọi trước khi giao..." />
+                {t("cart", "field_note", "Ghi chú thêm")}
+                <textarea name="notes" rows={4} maxLength={1000} placeholder={t("cart", "field_note_placeholder", "Ví dụ: giao giờ hành chính, cần hộp quà, cần gọi trước khi giao...")} />
               </label>
 
               <div className="order-modal-cart-summary">
-                <strong>{editingOrder.totals.totalQuantity} sản phẩm trong yêu cầu</strong>
-                <span>Trạng thái: {editingOrder.status}</span>
+                <strong>{totalQuantity} {t("cart", "products_in_cart", "sản phẩm trong giỏ")}</strong>
+                <span>{t("cart", "estimated_total", "Tổng dự kiến")}{unpricedSuffix}: {formatVnd(totals.estimatedTotal)}</span>
               </div>
 
-              {editOrderSuccess ? <p className="order-form-success" role="status">Đã cập nhật thông tin nhận hàng cho yêu cầu này.</p> : null}
-              {editOrderError ? <p className="order-form-error" role="alert">{editOrderError}</p> : null}
+              {orderError ? <p className="order-form-error" role="alert">{orderError}</p> : null}
 
               <div className="order-modal-actions">
-                <button type="button" className="order-modal-secondary" onClick={closeEditOrderModal}>Đóng</button>
-                <button type="submit" className="order-modal-submit">Lưu thay đổi</button>
+                <button type="button" className="order-modal-secondary" onClick={closeOrderModal}>{t("cart", "cancel", "Hủy")}</button>
+                <button type="submit" className="order-modal-submit" disabled={isSubmittingOrder}>{isSubmittingOrder ? t("cart", "submitting", "Đang gửi...") : t("cart", "submit", "Gửi xác nhận")}</button>
               </div>
             </form>
-          </div>
-        </div>
-      ) : null}
-
-      {isOrderModalOpen ? (
-        <div className="order-modal-backdrop" role="presentation" onMouseDown={closeOrderModal}>
-          <div className="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title" onMouseDown={(event) => event.stopPropagation()}>
-            <button className="order-modal-close" type="button" aria-label="Đóng form đặt hàng" onClick={closeOrderModal}>×</button>
-
-            {orderSuccess ? (
-              <div className="order-success-state" role="status">
-                <span className="order-success-icon" aria-hidden="true">✓</span>
-                <h2 id="order-modal-title">Yêu cầu đã được ghi nhận</h2>
-                <p>Cảm ơn quý khách đã tin tưởng lựa chọn chúng tôi. Nhân viên sẽ liên hệ lại quý khách để xác nhận sớm nhất !</p>
-                <button type="button" onClick={closeOrderModal}>Đóng</button>
-              </div>
-            ) : (
-              <form className="order-request-form" onSubmit={handleOrderSubmit}>
-                <div className="order-modal-heading">
-                  <span>Thông tin đặt hàng</span>
-                  <h2 id="order-modal-title">Xác nhận yêu cầu đặt hàng</h2>
-                  <p>Vui lòng để lại thông tin liên hệ để nhân viên xác nhận sản phẩm, số lượng, địa chỉ và thời gian giao phù hợp.</p>
-                </div>
-
-                <div className="order-form-grid">
-                  <label>
-                    Họ và tên *
-                    <input name="name" type="text" placeholder="Nguyễn Minh Anh" required />
-                  </label>
-                  <label>
-                    Số điện thoại *
-                    <input name="phone" type="tel" placeholder="09xx xxx xxx" required />
-                  </label>
-                  <label>
-                    Email *
-                    <input name="email" type="email" placeholder="email@example.com" required />
-                  </label>
-                  <label>
-                    Địa chỉ nhận hàng *
-                    <input name="address" type="text" placeholder="Số nhà, phường/xã, tỉnh/thành" required />
-                  </label>
-                </div>
-
-                <label>
-                  Ghi chú thêm
-                  <textarea name="notes" rows={4} placeholder="Ví dụ: giao giờ hành chính, cần hộp quà, cần gọi trước khi giao..." />
-                </label>
-
-                <div className="order-modal-cart-summary">
-                  <strong>{totalQuantity} sản phẩm trong giỏ</strong>
-                  <span>Tổng dự kiến: {formatCurrency(totals.estimatedTotal)}</span>
-                </div>
-
-                {orderError ? <p className="order-form-error" role="alert">{orderError}</p> : null}
-
-                <div className="order-modal-actions">
-                  <button type="button" className="order-modal-secondary" onClick={closeOrderModal}>Hủy</button>
-                  <button type="submit" className="order-modal-submit" disabled={isSubmittingOrder}>{isSubmittingOrder ? "Đang gửi..." : "Gửi xác nhận"}</button>
-                </div>
-              </form>
-            )}
           </div>
         </div>
       ) : null}

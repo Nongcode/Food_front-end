@@ -1,15 +1,17 @@
-import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, indexRobots, publicAlternates } from "@/lib/seo";
+import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, indexRobots, publicAlternates, pageTitle } from "@/lib/seo";
 import { headers } from "next/headers";
 import { PageDisabled } from "../../components/PageDisabled";
 import { notFound } from "next/navigation";
 import { JsonLd } from "../../components/JsonLd";
 import { LeadForm } from "../../components/LeadForm";
+import { DetailAddToCartButton } from "../../components/DetailAddToCartButton";
 import { PackageDetailGallery } from "../../components/PackageDetailGallery";
 import { SiteHeader } from "../../components/SiteHeader";
 import { normalizeLocale } from "@/lib/i18n/config";
 import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
 import { isSitePageInactive } from "@/lib/siteSettings";
 import { getPublicSpecialties, getPublicSpecialtyDetail } from "@/lib/publicContent";
+import { formatProductPrice } from "@/lib/customerOrders";
 
 type SpecialtyDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -26,7 +28,7 @@ export async function generateMetadata({ params }: SpecialtyDetailPageProps) {
   const item = payload?.specialty;
 
   if (!item) {
-    return { title: "Không tìm thấy đặc sản | Sơn La Food" };
+    return { title: "Không tìm thấy đặc sản" };
   }
   const title = item.name + " | Sơn La Food";
   const description = item.description || "";
@@ -35,7 +37,7 @@ export async function generateMetadata({ params }: SpecialtyDetailPageProps) {
   const imageUrl = item.imageUrl || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
 
   return {
-    title,
+    title: pageTitle(title),
     description,
     alternates: publicAlternates(path),
     openGraph: {
@@ -75,14 +77,27 @@ export default async function SpecialtyDetailPage({ params }: SpecialtyDetailPag
   const bannerImage = detail.bannerImageUrl || item.imageUrl || "https://images.unsplash.com/photo-1555931202-3c1a7042fbd1?auto=format&fit=crop&q=80&w=1600";
   const gallery = [bannerImage]; // We don't have multiple images for specialties yet, just the main and banner
 
+  // Giá hiển thị lấy từ priceValue/priceUnit (giá BE tính đơn), priceText chỉ dùng khi chưa có giá số
+  const displayPrice = formatProductPrice(item.priceValue, item.priceUnit, item.priceText, t("cart", "price_contact", "Giá liên hệ"));
   const quickFacts = [
-    { icon: "wallet", label: t("localSpecialty", "price", "Giá tham khảo"), value: item.priceText },
+    { icon: "wallet", label: t("localSpecialty", "price", "Giá tham khảo"), value: displayPrice },
     { icon: "pin", label: t("localSpecialty", "whereToBuy", "Nơi mua"), value: item.whereToBuy },
   ];
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://timesgreen.net";
   const canonicalUrl = `${baseUrl}/dac-san/${item.slug}`;
   const specialtyImage = item.imageUrl || `${baseUrl}/sonla-logo-readable.png`;
+  const detailCartItem = {
+    id: `specialty:${item.slug}`,
+    slug: item.slug,
+    name: item.name,
+    seller: item.whereToBuy || "S\u01a1n La Food",
+    note: item.description || "",
+    image: item.imageUrl || bannerImage,
+    price: item.priceValue ?? 0,
+    priceText: displayPrice,
+    type: "specialty" as const,
+  };
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -99,7 +114,7 @@ export default async function SpecialtyDetailPage({ params }: SpecialtyDetailPag
         offers: {
           "@type": "Offer",
           priceCurrency: "VND",
-          price: item.priceText ? item.priceText.replace(/[^0-9]/g, "") || "0" : "0",
+          price: String(item.priceValue ?? 0),
           availability: "https://schema.org/InStock",
           url: canonicalUrl,
         },
@@ -132,8 +147,8 @@ export default async function SpecialtyDetailPage({ params }: SpecialtyDetailPag
           <h2>{item.name}</h2>
           <p>{item.description}</p>
           <div className="detail-hero-actions">
-            <a href="#detail-consult">{t("localSpecialty", "consult_now", "Liên hệ mua hàng")}</a>
-            <span>{item.priceText}</span>
+            <DetailAddToCartButton item={detailCartItem} />
+            <span>{displayPrice}</span>
           </div>
 
           <div className="detail-quick-facts">
@@ -155,11 +170,11 @@ export default async function SpecialtyDetailPage({ params }: SpecialtyDetailPag
       <section className="package-detail-shell">
         <aside className="detail-summary-card">
           <span className="status-badge available">{item.type === "FOOD" ? t("localSpecialty", "type_food", "Ẩm thực") : t("localSpecialty", "type_handicraft", "Thủ công mỹ nghệ")}</span>
-          <h2>{item.priceText}</h2>
+          <h2>{displayPrice}</h2>
           <dl>
             <div><dt>{t("localSpecialty", "whereToBuy", "Nơi mua")}</dt><dd>{item.whereToBuy}</dd></div>
           </dl>
-          <a href="#detail-consult">{local({ vi: "Nhận báo giá", en: "Get quotation", "zh-CN": "获取报价" })}</a>
+          <DetailAddToCartButton item={detailCartItem} />
         </aside>
 
         <div className="detail-content">

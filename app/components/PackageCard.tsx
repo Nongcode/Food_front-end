@@ -3,8 +3,9 @@
 import type { MouseEvent, PointerEvent } from "react";
 import Link from "next/link";
 import { getStatusStyleAndLabel } from "@/lib/status";
-import { addCartItem, parseCartPrice } from "./cartStorage";
+import { addCartItem } from "./cartStorage";
 import { useI18n } from "./I18nProvider";
+import { backgroundWithFallback } from "@/lib/imageFallback";
 
 type PackageCardProps = {
   item: {
@@ -13,6 +14,7 @@ type PackageCardProps = {
     destination: string;
     duration: string;
     price: string;
+    priceValue?: number | null;
     summary: string;
     image: string;
     status: string;
@@ -89,7 +91,7 @@ export function PackageCard({ item }: PackageCardProps) {
       seller: item.destination || "Sơn La Food",
       note: item.summary,
       image: item.image,
-      price: parseCartPrice(item.price),
+      price: item.priceValue ?? 0,
       priceText: item.price,
       type: "package",
     });
@@ -102,7 +104,7 @@ export function PackageCard({ item }: PackageCardProps) {
   return (
     <article className="package-card">
       <Link className="package-card-link" href={href("/combo-dac-san/" + item.slug)}>
-        <div className="package-image" style={{ backgroundImage: "url(" + item.image + ")" }}>
+        <div className="package-image" style={{ backgroundImage: backgroundWithFallback(item.image) }}>
           <span className="package-food-badge">{foodMeta.badge}</span>
           <span className={`status-badge ${statusClass}`}>
             {statusLabel}
@@ -127,8 +129,8 @@ export function PackageCard({ item }: PackageCardProps) {
           type="button"
           onClick={handleAddToCart}
           onPointerDown={stopScrollerDrag}
-          aria-label={`Thêm ${item.name} vào giỏ hàng`}
-          title="Thêm vào giỏ hàng"
+          aria-label={t("localSpecialty", "add_to_cart_named", "Thêm {name} vào giỏ hàng").replace("{name}", item.name)}
+          title={t("localSpecialty", "add_to_cart", "Thêm vào giỏ hàng")}
         >
           <span className="cart-icon" aria-hidden="true" />
         </button>

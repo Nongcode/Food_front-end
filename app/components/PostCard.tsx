@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "./I18nProvider";
+import { backgroundWithFallback } from "@/lib/imageFallback";
 
 type PostCardProps = {
   post: {
@@ -21,7 +22,7 @@ export function PostCard({ post }: PostCardProps) {
 
   return (
     <article className="post-card">
-      <div className="post-image" style={{ backgroundImage: "url(" + post.image + ")" }} />
+      <div className="post-image" style={{ backgroundImage: backgroundWithFallback(post.image) }} />
       <div className="post-body">
         <div className="post-meta">
           <span>{post.category}</span>

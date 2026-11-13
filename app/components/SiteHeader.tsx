@@ -5,8 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { stripLocaleFromPath, withLocalePrefix } from "@/lib/i18n/config";
+import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, stripLocaleFromPath, withLocalePrefix } from "@/lib/i18n/config";
+
+// Ghi nhớ ngôn ngữ khách tự chọn để proxy không tự chuyển theo trình duyệt nữa
+function rememberLocale(code: string) {
+  document.cookie = `${LOCALE_COOKIE}=${encodeURIComponent(code)}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; samesite=lax`;
+}
 import { CART_UPDATED_EVENT, readCartItems } from "./cartStorage";
+import { clearLegacyDemoStorage, useCurrentCustomer } from "@/lib/customerSession";
 import { useI18n } from "./I18nProvider";
 
 type SiteHeaderProps = {
@@ -63,13 +69,14 @@ function getCartQuantity() {
 }
 
 function CartBadge({ count }: { count: number }) {
+  const { t } = useI18n();
   if (count <= 0) return null;
-  return <span className="cart-count-badge" aria-label={`${count} sản phẩm trong giỏ hàng`}>{count > 99 ? "99+" : count}</span>;
+  return <span className="cart-count-badge" aria-label={t("nav", "cart_count", "{count} sản phẩm trong giỏ hàng").replace("{count}", String(count))}>{count > 99 ? "99+" : count}</span>;
 }
 
 function LanguageSwitcher() {
   const pathname = usePathname() || "/";
-  const { locale, languages } = useI18n();
+  const { locale, languages, t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const stripped = stripLocaleFromPath(pathname).pathname;
   const visibleLanguages = languages.filter((language) => language.isActive);
@@ -108,7 +115,7 @@ function LanguageSwitcher() {
   };
 
   return (
-    <div className="custom-language-dropdown" aria-label="Chuyển ngôn ngữ">
+    <div className="custom-language-dropdown" aria-label={t("nav", "switch_language", "Chuyển ngôn ngữ")}>
       <button
         suppressHydrationWarning
         className="dropdown-trigger"
@@ -132,6 +139,7 @@ function LanguageSwitcher() {
               <a
                 key={language.code}
                 href={targetHref}
+                onClick={() => rememberLocale(language.code)}
                 className={`dropdown-item ${isCurrent ? "active" : ""}`}
                 aria-label={language.nativeName || language.name}
                 title={language.nativeName || language.name}
@@ -161,8 +169,12 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [cartQuantity, setCartQuantity] = useState(0);
+  const { customer: currentUser } = useCurrentCustomer();
   const isHeroHeader = variant === "hero";
   const visibleNavItems = siteChrome.header.menu.filter((item) => !item.settingKey || !hiddenPageKeys.includes(item.settingKey));
+  const accountHref = currentUser ? href("/tai-khoan") : href("/dang-nhap");
+  const accountLabel = currentUser ? t("nav", "account_profile", "Hồ sơ tài khoản") : t("nav", "account_login", "Đăng nhập tài khoản");
+  const accountInitial = currentUser?.name?.trim().charAt(0).toUpperCase() || "";
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => setIsMounted(true));
@@ -180,6 +192,11 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
       window.removeEventListener(CART_UPDATED_EVENT, updateCartQuantity);
       window.removeEventListener("storage", updateCartQuantity);
     };
+  }, []);
+
+  // Tài khoản demo cũ lưu ở localStorage không còn dùng
+  useEffect(() => {
+    clearLegacyDemoStorage();
   }, []);
 
   useEffect(() => {
@@ -300,7 +317,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
           <button 
             className="drawer-close"
             onClick={() => setIsMobileMenuOpen(false)}
-            aria-label="Close menu"
+            aria-label={t("nav", "close_menu", "Đóng menu")}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="close-svg-icon">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -337,7 +354,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
             <p className="mobile-search-kicker">Sơn La Food</p>
             <h2>{t("nav", "search_trip", "Tìm đặc sản")}</h2>
           </div>
-          <button type="button" className="mobile-search-close" onClick={() => setIsMobileSearchOpen(false)} aria-label="Close search">
+          <button type="button" className="mobile-search-close" onClick={() => setIsMobileSearchOpen(false)} aria-label={t("nav", "close_search", "Đóng tìm kiếm")}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
@@ -381,7 +398,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
       </Link>
       
       {/* Desktop Navigation */}
-      <nav className="desktop-nav" aria-label="Điều hướng chính">
+      <nav className="desktop-nav" aria-label={t("nav", "main_nav", "Điều hướng chính")}>
         {visibleNavItems.map((item) => {
           const itemHref = item.url.startsWith("/") ? href(item.url) : item.url;
           const isHome = item.url === "/";
@@ -396,17 +413,26 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
             </Link>
           );
         })}
-        <Link className={`cart-nav ${strippedPath === "/gio-hang" ? "active" : ""}`} href={href("/gio-hang")} aria-label="Giỏ hàng">
+        <Link className={`cart-nav ${strippedPath === "/gio-hang" ? "active" : ""}`} href={href("/gio-hang")} aria-label={t("nav", "cart", "Giỏ hàng")}>
           <span className="cart-icon" aria-hidden="true" />
           <CartBadge count={cartQuantity} />
+        </Link>
+        <Link className={`account-nav ${strippedPath === "/tai-khoan" || strippedPath === "/dang-nhap" || strippedPath === "/dang-ky" ? "active" : ""}`} href={accountHref} aria-label={accountLabel} title={accountLabel}>
+          <span className="user-icon" aria-hidden="true" />
+          {accountInitial && <span className="account-initial" aria-hidden="true">{accountInitial}</span>}
         </Link>
         <LanguageSwitcher />
       </nav>
 
-      <div className="mobile-header-actions" aria-label="Thao tác nhanh">
-        <Link className="mobile-header-search" href={href("/gio-hang")} aria-label="Giỏ hàng">
+      <div className="mobile-header-actions" aria-label={t("nav", "quick_actions", "Thao tác nhanh")}>
+        <Link className="mobile-header-search" href={href("/gio-hang")} aria-label={t("nav", "cart", "Giỏ hàng")}>
           <span className="cart-icon" aria-hidden="true" />
           <CartBadge count={cartQuantity} />
+        </Link>
+
+        <Link className="mobile-header-search account-mobile-link" href={accountHref} aria-label={accountLabel}>
+          <span className="user-icon" aria-hidden="true" />
+          {accountInitial && <span className="account-initial" aria-hidden="true">{accountInitial}</span>}
         </Link>
 
         <div className="mobile-header-language">
@@ -416,7 +442,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
         <button 
           className={`mobile-menu-toggle ${isMobileMenuOpen ? "open" : ""}`}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle menu"
+          aria-label={t("nav", "toggle_menu", "Mở/đóng menu")}
           aria-expanded={isMobileMenuOpen}
         >
           <span className="hamburger-line line-1" />

@@ -80,6 +80,18 @@ export function sitemapAlternates(path = "/") {
   };
 }
 
+const SITE_SUFFIX = ` | ${SITE_NAME}`;
+
+/**
+ * Tiêu đề cho thẻ <title>: layout gốc đã có template "%s | Sơn La Food",
+ * nên bỏ hậu tố trùng; nếu tiêu đề vẫn chứa tên site (vd. trang chủ) thì dùng absolute
+ * để không bị nối thêm lần nữa.
+ */
+export function pageTitle(title: string): NonNullable<Metadata["title"]> {
+  const base = title.endsWith(SITE_SUFFIX) ? title.slice(0, -SITE_SUFFIX.length) : title;
+  return base.includes(SITE_NAME) ? { absolute: base } : base;
+}
+
 export function publicPageMetadata({
   title,
   description,
@@ -94,7 +106,7 @@ export function publicPageMetadata({
   type?: "website" | "article";
 }): Metadata {
   return {
-    title,
+    title: pageTitle(title),
     description,
     alternates: publicAlternates(path),
     openGraph: {

@@ -18,11 +18,12 @@ export function ReviewForm({ destinations }: ReviewFormProps) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setLoading(true);
     setError("");
     setSuccess(false);
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const phone = formData.get("phone") as string;
@@ -52,7 +53,7 @@ export function ReviewForm({ destinations }: ReviewFormProps) {
       const data = await res.json();
       if (data.success) {
         setSuccess(true);
-        event.currentTarget.reset();
+        form.reset();
         setRating(5);
         // Force reload page to show the new review immediately
         window.location.reload();
@@ -97,7 +98,7 @@ export function ReviewForm({ destinations }: ReviewFormProps) {
               name="packageName"
               defaultValue=""
               placeholder={t("form", "choose_destination", "Chọn combo")}
-              options={destinations.map((dest) => ({ value: dest, label: dest }))}
+              options={Array.from(new Set(destinations)).map((dest) => ({ value: dest, label: dest }))}
             />
           </label>
         </div>

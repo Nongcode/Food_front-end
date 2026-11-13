@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { PageDisabled } from "../components/PageDisabled";
@@ -8,15 +9,20 @@ import { SiteHeader } from "../components/SiteHeader";
 import { isSitePageInactive } from "@/lib/siteSettings";
 import { normalizeLocale, withLocalePrefix } from "@/lib/i18n/config";
 import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
+import { getPageTranslator } from "@/lib/i18n/pageCopy";
 import { getPublicPosts } from "@/lib/publicContent";
+import { backgroundWithFallback } from "@/lib/imageFallback";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = publicPageMetadata({
-  title: "Câu chuyện ẩm thực Sơn La, mẹo chọn đặc sản | Sơn La Food",
-  description: "Đọc câu chuyện ẩm thực Sơn La, mẹo chọn đặc sản, cách dùng chẩm chéo, thịt gác bếp, chè Shan tuyết và nông sản theo mùa.",
-  path: "/tin-tuc",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const { tr } = await getPageTranslator("news");
+  return publicPageMetadata({
+    title: tr("meta_title", "Câu chuyện ẩm thực Sơn La, mẹo chọn đặc sản"),
+    description: tr("meta_description", "Đọc câu chuyện ẩm thực Sơn La, mẹo chọn đặc sản, cách dùng chẩm chéo, thịt gác bếp, chè Shan tuyết và nông sản theo mùa."),
+    path: "/tin-tuc",
+  });
+}
 
 
 const legacyDecoder = new TextDecoder("windows-1252");
@@ -77,7 +83,7 @@ export default async function NewsPage() {
       <section className="editorial-lead">
         <div
           className="editorial-image"
-          style={{ backgroundImage: `url(${leadPost.image})` }}
+          style={{ backgroundImage: backgroundWithFallback(leadPost.image) }}
         />
         <div className="editorial-copy">
           <p className="eyebrow">{leadPost.category}</p>

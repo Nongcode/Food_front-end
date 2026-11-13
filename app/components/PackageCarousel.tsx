@@ -66,7 +66,7 @@ export function PackageCarousel({ items, fallbackItems = [], minItems = 5 }: Pac
 
   return (
     <div className="package-carousel">
-      <button suppressHydrationWarning className="package-carousel-nav prev" type="button" aria-label="Xem g\u00f3i tr\u01b0\u1edbc" onClick={() => scrollByCard("prev")}>
+      <button suppressHydrationWarning className="package-carousel-nav prev" type="button" aria-label={"Xem g\u00f3i tr\u01b0\u1edbc"} onClick={() => scrollByCard("prev")}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M15 18l-6-6 6-6" />
         </svg>
@@ -90,7 +90,7 @@ export function PackageCarousel({ items, fallbackItems = [], minItems = 5 }: Pac
           progress={progress}
         />
       ) : null}
-      <button suppressHydrationWarning className="package-carousel-nav next" type="button" aria-label="Xem g\u00f3i ti\u1ebfp theo" onClick={() => scrollByCard("next")}>
+      <button suppressHydrationWarning className="package-carousel-nav next" type="button" aria-label={"Xem g\u00f3i ti\u1ebfp theo"} onClick={() => scrollByCard("next")}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M9 18l6-6-6-6" />
         </svg>

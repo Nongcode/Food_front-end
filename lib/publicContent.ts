@@ -47,6 +47,8 @@ export type PublicSpecialty = {
   description: string;
   imageUrl: string;
   priceText: string;
+  priceValue: number | null;
+  priceUnit: string | null;
   whereToBuy: string;
   destinationName: string;
 };
@@ -83,7 +85,7 @@ const fallbackLanguages: LanguageOption[] = defaultLanguages.map((language) => (
 const fallbackHomeBanners: PublicHomePayload["homepageBanners"] = [
   {
     id: -1,
-    title: "Sản phẩm đặc sản từ Sơn La đến mâm cơm nhà bạn.",
+    title: "Sản phẩm đặc sản từ Sơn La đến mâm cơm của bạn.",
     subtitle: "Combo quà tặng Tây Bắc, thịt gác bếp, chẩm chéo, chè Shan tuyết và trái cây theo mùa.",
     imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=2200&q=85",
     linkUrl: "/combo-dac-san",
@@ -124,6 +126,8 @@ const fallbackSpecialties: PublicSpecialty[] = fallbackPackages().map((item) => 
   description: item.summary,
   imageUrl: item.image,
   priceText: item.price,
+  priceValue: null,
+  priceUnit: null,
   whereToBuy: "Sơn La Food",
   destinationName: item.destination,
 }));

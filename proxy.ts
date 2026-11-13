@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { detectLocaleFromAcceptLanguage, localePrefix, stripLocaleFromPath } from "@/lib/i18n/config";
-import { verifyToken } from "@/lib/auth";
+import { LOCALE_COOKIE, detectLocaleFromAcceptLanguage, localePrefix, readLocaleCookie, stripLocaleFromPath } from "@/lib/i18n/config";
 
 function isCrawler(userAgent: string | null) {
   if (!userAgent) return false;
@@ -26,8 +25,6 @@ export function proxy(request: NextRequest) {
   const localized = stripLocaleFromPath(pathname);
   const effectivePathname = localized.pathname;
 
-  const token = request.cookies.get("admin_token")?.value;
-
   if (effectivePathname === "/goi-du-lich" || effectivePathname.startsWith("/goi-du-lich/")) {
     const redirectUrl = request.nextUrl.clone();
     const nextPath = effectivePathname.replace(/^\/goi-du-lich/, "/combo-dac-san");
@@ -37,7 +34,9 @@ export function proxy(request: NextRequest) {
 
   const isInternalLocaleRewrite = request.headers.has("x-locale");
   const hasExplicitLocale = localized.pathname !== pathname;
-  const preferredLocale = detectLocaleFromAcceptLanguage(request.headers.get("accept-language"));
+  // Ưu tiên ngôn ngữ khách đã tự chọn (cookie); chỉ đoán theo Accept-Language khi chưa có cookie
+  const chosenLocale = readLocaleCookie(request.cookies.get(LOCALE_COOKIE)?.value);
+  const preferredLocale = chosenLocale ?? detectLocaleFromAcceptLanguage(request.headers.get("accept-language"));
   const preferredPrefix = localePrefix(preferredLocale);
   const shouldAutoRedirectLocale =
     !isInternalLocaleRewrite &&
@@ -57,43 +56,20 @@ export function proxy(request: NextRequest) {
   requestHeaders.set("x-pathname", effectivePathname);
   requestHeaders.set("x-locale", localized.locale);
 
-  const nextResponse = () => {
-    if (effectivePathname !== pathname) {
-      const rewriteUrl = request.nextUrl.clone();
-      rewriteUrl.pathname = effectivePathname;
-      return NextResponse.rewrite(rewriteUrl, {
-        request: { headers: requestHeaders },
-      });
-    }
-
-    return NextResponse.next({
+  // /admin/* is rewritten to the backend (next.config.ts), whose own proxy validates admin_token.
+  if (effectivePathname !== pathname) {
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = effectivePathname;
+    return NextResponse.rewrite(rewriteUrl, {
       request: { headers: requestHeaders },
     });
-  };
-
-  const session = token ? verifyToken(token) : null;
-
-  if (effectivePathname.startsWith("/admin")) {
-    if (effectivePathname === "/admin/login") {
-      if (session) {
-        return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-      }
-      const response = nextResponse();
-      if (token) response.cookies.delete("admin_token");
-      return response;
-    }
-
-    if (!session) {
-      const loginUrl = new URL("/admin/login", request.url);
-      const response = NextResponse.redirect(loginUrl);
-      if (token) response.cookies.delete("admin_token");
-      return response;
-    }
   }
 
-  return nextResponse()
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api).*)"],
+  matcher: ["/((?!_next/static|_next/image|be-static|favicon.ico|api).*)"],
 };

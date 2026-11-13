@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { backgroundWithFallback } from "@/lib/imageFallback";
 
 type PackageDetailGalleryProps = {
   images: string[];
@@ -33,7 +34,7 @@ export function PackageDetailGallery({
     <div className="detail-gallery-shell" aria-label={`Bộ sưu tập ảnh của ${title}`}>
       <div
         className="detail-gallery-main"
-        style={{ backgroundImage: `url(${images[activeIndex]})` }}
+        style={{ backgroundImage: backgroundWithFallback(images[activeIndex]) }}
       >
         <div className="detail-gallery-status">
           <span>{String(activeIndex + 1).padStart(2, "0")}</span>
@@ -55,7 +56,7 @@ export function PackageDetailGallery({
               type="button"
               key={`${image}-${index}`}
               className={`detail-gallery-thumb${index === activeIndex ? " active" : ""}`}
-              style={{ backgroundImage: `url(${image})` }}
+              style={{ backgroundImage: backgroundWithFallback(image) }}
               aria-label={`Chọn ảnh ${index + 1}`}
               aria-pressed={index === activeIndex}
               onClick={() => selectImage(index)}

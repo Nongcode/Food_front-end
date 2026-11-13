@@ -12,6 +12,7 @@ import { withLocalePrefix } from "@/lib/i18n/config";
 import { getRequestLocale, getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
 import { getPublicHome } from "@/lib/publicContent";
 import type { PublicPackage, PublicPackageCollection } from "@/lib/packages";
+import { backgroundWithFallback } from "@/lib/imageFallback";
 
 export const dynamic = "force-dynamic";
 
@@ -385,7 +386,7 @@ export default async function Home() {
         <div className="style-grid benefits-grid">
           {tripStyles.map((item, index) => (
             <article key={`${item.title}-${index}`}>
-              <div className="style-image" style={{ backgroundImage: `url(${item.image})` }} />
+              <div className="style-image" style={{ backgroundImage: backgroundWithFallback(item.image) }} />
               <h3>{item.title}</h3>
               <p>{item.detail}</p>
             </article>

@@ -19,12 +19,6 @@ function canUseStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }
 
-export function parseCartPrice(priceText?: string | null) {
-  if (!priceText) return 0;
-  const digits = priceText.replace(/[^0-9]/g, "");
-  return digits ? Number(digits) : 0;
-}
-
 function normalizeItem(item: StoredCartItem): StoredCartItem {
   return {
     ...item,
@@ -34,13 +28,10 @@ function normalizeItem(item: StoredCartItem): StoredCartItem {
   };
 }
 
-export function readCartItems(): StoredCartItem[] {
-  if (!canUseStorage()) return [];
+export function parseCartItems(rawValue: string | null): StoredCartItem[] {
+  if (!rawValue) return [];
 
   try {
-    const rawValue = window.localStorage.getItem(CART_STORAGE_KEY);
-    if (!rawValue) return [];
-
     const parsed = JSON.parse(rawValue);
     if (!Array.isArray(parsed)) return [];
 
@@ -50,6 +41,25 @@ export function readCartItems(): StoredCartItem[] {
   } catch {
     return [];
   }
+}
+
+export function readCartItems(): StoredCartItem[] {
+  if (!canUseStorage()) return [];
+  return parseCartItems(window.localStorage.getItem(CART_STORAGE_KEY));
+}
+
+// Chuỗi thô làm snapshot cho useSyncExternalStore (so sánh được bằng ===)
+export function readCartSnapshot(): string {
+  return canUseStorage() ? window.localStorage.getItem(CART_STORAGE_KEY) || "" : "";
+}
+
+export function subscribeCart(onChange: () => void) {
+  window.addEventListener(CART_UPDATED_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(CART_UPDATED_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
 }
 
 export function writeCartItems(items: StoredCartItem[]) {

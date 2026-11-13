@@ -73,3 +73,12 @@ export function detectLocaleFromAcceptLanguage(headerValue?: string | null): Sup
 
   return DEFAULT_LOCALE;
 }
+
+// Ngôn ngữ khách tự chọn ở bộ chuyển ngôn ngữ; có cookie này thì proxy không đoán theo Accept-Language nữa
+export const LOCALE_COOKIE = "NEXT_LOCALE";
+export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
+export function readLocaleCookie(value?: string | null): SupportedLocale | null {
+  if (!value) return null;
+  return (SUPPORTED_LOCALES as readonly string[]).includes(value) ? (value as SupportedLocale) : null;
+}

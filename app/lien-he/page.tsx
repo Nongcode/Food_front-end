@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { publicPageMetadata } from "@/lib/seo";
 import Image from "next/image";
 import { headers } from "next/headers";
@@ -7,17 +8,21 @@ import { ReviewCarousel } from "../components/ReviewCarousel";
 import { SiteHeader } from "../components/SiteHeader";
 import { normalizeLocale } from "@/lib/i18n/config";
 import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
+import { getPageTranslator } from "@/lib/i18n/pageCopy";
 import { getPublicPackages } from "@/lib/packages";
 import { getPublicReviews } from "@/lib/publicContent";
 import { isSitePageInactive } from "@/lib/siteSettings";
 import { PageDisabled } from "../components/PageDisabled";
 
 export const dynamic = "force-dynamic";
-export const metadata = publicPageMetadata({
-  title: "Liên hệ đặt hàng đặc sản Sơn La | Sơn La Food",
-  description: "Liên hệ Sơn La Food để đặt số lượng lớn, custom set quà tặng riêng, nhận tư vấn đặc sản Sơn La theo ngân sách và thời gian giao hàng.",
-  path: "/lien-he",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const { tr } = await getPageTranslator("contact");
+  return publicPageMetadata({
+    title: tr("meta_title", "Liên hệ đặt hàng đặc sản Sơn La"),
+    description: tr("meta_description", "Liên hệ Sơn La Food để đặt số lượng lớn, custom set quà tặng riêng, nhận tư vấn đặc sản Sơn La theo ngân sách và thời gian giao hàng."),
+    path: "/lien-he",
+  });
+}
 
 export default async function ContactPage() {
   if (await isSitePageInactive("page_contact_status")) {

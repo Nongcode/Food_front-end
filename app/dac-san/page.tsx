@@ -1,22 +1,29 @@
+import type { Metadata } from "next";
 import { publicPageMetadata } from "@/lib/seo";
 import { headers } from "next/headers";
 import { PageDisabled } from "../components/PageDisabled";
 import { SiteHeader } from "../components/SiteHeader";
 import { PackageExplorer } from "../components/PackageExplorer";
+import { LocalSpecialtyExplorer } from "../components/LocalSpecialtyExplorer";
 import { isSitePageInactive } from "@/lib/siteSettings";
 import { normalizeLocale } from "@/lib/i18n/config";
 import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
+import { getPageTranslator } from "@/lib/i18n/pageCopy";
 import { destinations } from "../data/food";
 import { getPublicPackageCollections, getPublicPackages } from "@/lib/packages";
+import { getPublicSpecialties } from "@/lib/publicContent";
 import { ensureFullProductCollections } from "@/lib/productCategoryCollections";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = publicPageMetadata({
-  title: "Đặc sản Sơn La, quà biếu Tây Bắc & hương vị bản địa | Sơn La Food",
-  description: "Khám phá đặc sản Sơn La, quà biếu Tây Bắc, thịt gác bếp, chẩm chéo, chè Shan tuyết và nông sản theo mùa.",
-  path: "/dac-san",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const { tr } = await getPageTranslator("localSpecialty");
+  return publicPageMetadata({
+    title: tr("meta_title", "Đặc sản Sơn La, quà biếu Tây Bắc & hương vị bản địa"),
+    description: tr("meta_description", "Khám phá đặc sản Sơn La, quà biếu Tây Bắc, thịt gác bếp, chẩm chéo, chè Shan tuyết và nông sản theo mùa."),
+    path: "/dac-san",
+  });
+}
 
 
 export default async function LocalSpecialtiesPage() {
@@ -28,9 +35,10 @@ export default async function LocalSpecialtiesPage() {
   const translations = await getStaticTranslationMap(locale).catch(() => ({}));
   const t = (namespace: string, key: string, fallback: string) => translateFromMap(translations, namespace, key, fallback);
 
-  const [packages, rawCollections] = await Promise.all([
+  const [packages, rawCollections, { specialties }] = await Promise.all([
     getPublicPackages(locale),
     getPublicPackageCollections(locale),
+    getPublicSpecialties(locale),
   ]);
   const collections = ensureFullProductCollections(rawCollections, packages);
 
@@ -45,6 +53,9 @@ export default async function LocalSpecialtiesPage() {
       </section>
 
       <PackageExplorer packages={packages} collections={collections} destinations={destinations} />
+
+      {/* Từng sản phẩm đặc sản, mỗi thẻ dẫn tới /dac-san/[slug] */}
+      {specialties.length > 0 ? <LocalSpecialtyExplorer specialties={specialties} /> : null}
 
     </main>
   );

@@ -8,11 +8,12 @@ import { ReadingProgressBar } from "../../components/PostProgress";
 import { PostSidebar } from "../../components/PostSidebar";
 import { PostCard } from "../../components/PostCard";
 import { ContentBlock } from "../../data/postsContent";
-import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, indexRobots, publicAlternates } from "@/lib/seo";
+import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, indexRobots, publicAlternates, pageTitle } from "@/lib/seo";
 import { isSitePageInactive } from "@/lib/siteSettings";
 import { normalizeLocale, withLocalePrefix } from "@/lib/i18n/config";
 import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
 import { getPublicPostDetail, getPublicPosts } from "@/lib/publicContent";
+import { backgroundWithFallback } from "@/lib/imageFallback";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }: PostDetailPageProps) {
   const post = payload?.post;
 
   if (!post) {
-    return { title: "Không tìm thấy bài viết | Sơn La Food" };
+    return { title: "Không tìm thấy bài viết" };
   }
   const title = `${post.title} | Câu chuyện ẩm thực Sơn La`;
   const description = post.summary || undefined;
@@ -51,7 +52,7 @@ export async function generateMetadata({ params }: PostDetailPageProps) {
   const imageUrl = post.image || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
 
   return {
-    title,
+    title: pageTitle(title),
     description,
     alternates: publicAlternates(path),
     openGraph: {
@@ -222,7 +223,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
 
             {relatedPackage && (
               <div className="article-cta-package">
-                <div className="cta-package-image" style={{ backgroundImage: `url(${relatedPackage.image})` }} />
+                <div className="cta-package-image" style={{ backgroundImage: backgroundWithFallback(relatedPackage.image) }} />
                 <div className="cta-package-content">
                   <span className="cta-badge">{t("postDetail", "package_badge", "Gợi ý combo")}</span>
                   <h3>{t("postDetail", "package_title_prefix", "Combo Sơn La Food")}: {relatedPackage.name}</h3>

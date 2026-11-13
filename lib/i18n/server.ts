@@ -16,7 +16,8 @@ export type LanguageOption = {
   isDefault: boolean;
 };
 
-function getDefaultTranslationMap(locale: string): TranslationMap {
+/** Bản dịch giao diện mặc định của FE (defaults.ts); BE (admin) được phép ghi đè. */
+export function getDefaultTranslationMap(locale: string): TranslationMap {
   const normalizedLocale = normalizeLocale(locale);
   const map: TranslationMap = {};
   for (const item of [...defaultStaticTranslations, ...localSpecialtyStaticTranslations]) {

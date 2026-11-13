@@ -1,8 +1,11 @@
 "use client";
 
-import { addCartItem, parseCartPrice } from "./cartStorage";
+import Link from "next/link";
+import { addCartItem } from "./cartStorage";
 import { useMemo, useState } from "react";
 import { useI18n } from "./I18nProvider";
+import { formatProductPrice } from "@/lib/customerOrders";
+import { backgroundWithFallback } from "@/lib/imageFallback";
 
 type SpecialtyItem = {
   id: number;
@@ -12,6 +15,8 @@ type SpecialtyItem = {
   description: string | null;
   imageUrl: string | null;
   priceText: string | null;
+  priceValue?: number | null;
+  priceUnit?: string | null;
   whereToBuy: string | null;
   destinationName: string;
 };
@@ -30,7 +35,7 @@ const REGION_RULES: Array<{ value: RegionValue; keywords: string[] }> = [
       "ha noi", "ha giang", "lao cai", "sa pa", "sapa", "cao bang",
       "bac kan", "lang son", "thai nguyen", "quang ninh", "ha long",
       "ninh binh", "nam dinh", "thai binh", "hai phong", "phu tho",
-      "yen bai", "dien bien", "lai chau", "son la", "hoa binh", "tuyen quang",
+      "yen bai", "dien bien", "lai chau", "son la", "moc chau", "yen chau", "thuan chau", "mai son", "phu yen", "bac yen", "ta xua", "van ho", "hoa binh", "tuyen quang",
     ],
   },
   {
@@ -70,6 +75,21 @@ function getRegion(destinationName: string): RegionValue {
   )?.value || "other";
 }
 
+// Đủ các loại đặc sản BE dùng (khớp form admin)
+const TYPE_OPTIONS = [
+  { value: "FOOD", key: "type_food", label: "Món ăn" },
+  { value: "DRY_FOOD", key: "type_dry_food", label: "Đồ khô" },
+  { value: "DRINK", key: "type_drink", label: "Đồ uống / trà" },
+  { value: "SPICE", key: "type_spice", label: "Gia vị" },
+  { value: "FRUIT", key: "type_fruit", label: "Trái cây" },
+  { value: "HANDICRAFT", key: "type_handicraft", label: "Sản phẩm thủ công" },
+];
+
+function getTypeLabel(value: string, t: Translator) {
+  const option = TYPE_OPTIONS.find((item) => item.value === value);
+  return option ? t("localSpecialty", option.key, option.label) : value;
+}
+
 function getRegionLabel(value: string, t: Translator) {
   if (value === "north") return t("localSpecialty", "region_north", "Miền Bắc");
   if (value === "central") return t("localSpecialty", "region_central", "Miền Trung");
@@ -78,7 +98,8 @@ function getRegionLabel(value: string, t: Translator) {
 }
 
 export function LocalSpecialtyExplorer({ specialties }: LocalSpecialtyExplorerProps) {
-  const { t } = useI18n();
+  const { t, href } = useI18n();
+  const contactLabel = t("localSpecialty", "price_contact", "Liên hệ");
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState("all");
   const [type, setType] = useState("all");
@@ -164,8 +185,8 @@ export function LocalSpecialtyExplorer({ specialties }: LocalSpecialtyExplorerPr
       seller: item.destinationName || "Sơn La Food",
       note: item.description || item.whereToBuy || "Sản phẩm đặc sản Sơn La",
       image: item.imageUrl || "",
-      price: parseCartPrice(item.priceText),
-      priceText: item.priceText || t("localSpecialty", "price_contact", "Liên hệ"),
+      price: item.priceValue ?? 0,
+      priceText: formatProductPrice(item.priceValue, item.priceUnit, item.priceText, contactLabel),
       type: "specialty",
     });
   }
@@ -222,8 +243,9 @@ export function LocalSpecialtyExplorer({ specialties }: LocalSpecialtyExplorerPr
             }}
           >
             <option value="all">{t("localSpecialty", "all_types", "Tất cả nhóm")}</option>
-            <option value="FOOD">{t("localSpecialty", "type_food", "Ẩm thực")}</option>
-            <option value="HANDICRAFT">{t("localSpecialty", "type_handicraft", "Thủ công mỹ nghệ")}</option>
+            {TYPE_OPTIONS.filter((option) => items.some((item) => item.type === option.value)).map((option) => (
+              <option value={option.value} key={option.value}>{t("localSpecialty", option.key, option.label)}</option>
+            ))}
           </select>
         </label>
 
@@ -244,25 +266,27 @@ export function LocalSpecialtyExplorer({ specialties }: LocalSpecialtyExplorerPr
           <div className="offer-grid specialty-grid">
             {paginatedItems.map((item) => (
               <article className="offer-card" key={item.id}>
-                <div
+                <Link
+                  href={href(`/dac-san/${item.slug}`)}
                   className="offer-image"
-                  style={{ backgroundImage: "url(" + (item.imageUrl || "") + ")" }}
+                  style={{ backgroundImage: backgroundWithFallback(item.imageUrl) }}
+                  aria-label={`${t("localSpecialty", "view_detail", "Xem chi tiết")}: ${item.name}`}
                 >
-                  <span>{item.type === "FOOD" ? t("localSpecialty", "type_food", "Ẩm thực") : t("localSpecialty", "type_handicraft", "Thủ công mỹ nghệ")}</span>
-                </div>
+                  <span>{getTypeLabel(item.type, t)}</span>
+                </Link>
                 <div className="offer-body">
                   <p className="specialty-location">{item.destinationName || getRegionLabel(item.region, t)}</p>
-                  <h2>{item.name}</h2>
+                  <h2><Link href={href(`/dac-san/${item.slug}`)}>{item.name}</Link></h2>
                   <p>{item.description}</p>
                   <div className="offer-footer">
-                    <strong>{item.priceText || t("localSpecialty", "price_contact", "Liên hệ")}</strong>
+                    <strong>{formatProductPrice(item.priceValue, item.priceUnit, item.priceText, contactLabel)}</strong>
                     <button
                       suppressHydrationWarning
                       type="button"
                       className="offer-cart-button"
                       onClick={() => addSpecialtyToCart(item)}
-                      aria-label={`Thêm ${item.name} vào giỏ hàng`}
-                      title="Thêm vào giỏ hàng"
+                      aria-label={t("localSpecialty", "add_to_cart_named", "Thêm {name} vào giỏ hàng").replace("{name}", item.name)}
+                      title={t("localSpecialty", "add_to_cart", "Thêm vào giỏ hàng")}
                     >
                       <span className="cart-icon" aria-hidden="true" />
                     </button>
@@ -273,12 +297,12 @@ export function LocalSpecialtyExplorer({ specialties }: LocalSpecialtyExplorerPr
           </div>
 
           {totalPages > 1 ? (
-            <nav className="specialty-pagination" aria-label="Specialty pages">
+            <nav className="specialty-pagination" aria-label={t("localSpecialty", "pagination_label", "Trang danh sách đặc sản")}>
               <button
                 type="button"
                 className="specialty-pagination-arrow"
-                aria-label="Previous page"
-                title="Previous page"
+                aria-label={t("common", "previous_page", "Trang trước")}
+                title={t("common", "previous_page", "Trang trước")}
                 disabled={safePage === 1}
                 onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
               >
@@ -308,8 +332,8 @@ export function LocalSpecialtyExplorer({ specialties }: LocalSpecialtyExplorerPr
               <button
                 type="button"
                 className="specialty-pagination-arrow"
-                aria-label="Next page"
-                title="Next page"
+                aria-label={t("common", "next_page", "Trang sau")}
+                title={t("common", "next_page", "Trang sau")}
                 disabled={safePage === totalPages}
                 onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
               >

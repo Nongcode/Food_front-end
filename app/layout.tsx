@@ -5,6 +5,7 @@ import { DEFAULT_SITE_CHROME_CONFIG } from "@/lib/siteChromeShared";
 import { DEFAULT_OG_IMAGE, getSiteUrl, indexRobots, SITE_NAME } from "@/lib/seo";
 import { normalizeLocale, withLocalePrefix } from "@/lib/i18n/config";
 import type { LanguageOption, TranslationMap } from "@/lib/i18n/server";
+import { getDefaultTranslationMap } from "@/lib/i18n/server";
 import { I18nProvider } from "./components/I18nProvider";
 import { SiteFooter } from "./components/SiteFooter";
 import { CartToast } from "./components/CartToast";
@@ -92,7 +93,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     try {
       const state = await getPublicSiteChromeState(locale);
       hiddenPageKeys = state.hiddenPageKeys || [];
-      staticTranslations = state.staticTranslations || {};
+      // Gộp bản dịch mặc định của FE, để chuỗi giao diện mới (giỏ hàng, tài khoản...) có bản EN/ZH dù BE chưa có khoá
+      staticTranslations = { ...getDefaultTranslationMap(locale), ...(state.staticTranslations || {}) };
       activeLanguages = state.activeLanguages || [];
       siteChrome = state.siteChrome || DEFAULT_SITE_CHROME_CONFIG;
 

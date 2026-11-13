@@ -24,7 +24,7 @@ const foodDetailGallery = [
 
 export const defaultPackageDetailContent: PackageDetailContent = {
   gallery: foodDetailGallery,
-  overviewSuffix: "Mẫu demo này dùng chung cho các trang chi tiết sản phẩm, tập trung vào nguồn gốc, hương vị, quy cách đóng gói và cách tư vấn đặt hàng. Nội dung có thể thay bằng dữ liệu thật của từng hộ kinh doanh khi vận hành.",
+  overviewSuffix: "Sơn La Food giới thiệu rõ nguồn gốc, hương vị, quy cách đóng gói và cách bảo quản của từng sản phẩm, đồng thời tư vấn chọn món phù hợp trước khi bạn đặt hàng.",
   moments: [
     {
       title: "Thành phần đặc sản rõ ràng",
@@ -59,20 +59,20 @@ export const defaultPackageDetailContent: PackageDetailContent = {
   ],
   benefits: [
     "Dễ chọn món nhờ nhóm sản phẩm theo nhu cầu mua hàng.",
-    "Nội dung có thể mở rộng cho nhiều hộ kinh doanh cùng bán trên sàn.",
-    "Phù hợp demo luồng xem sản phẩm, thêm giỏ hàng và gửi yêu cầu tư vấn.",
+    "Sản phẩm được tuyển chọn từ các hộ sản xuất địa phương ở Sơn La.",
+    "Đặt hàng đơn giản: thêm vào giỏ hàng rồi gửi yêu cầu, nhân viên sẽ gọi xác nhận.",
   ],
   consultTitle: "Giữ lại sản phẩm này và nhận tư vấn đặt hàng phù hợp.",
   consultCopy: "Bạn chỉ cần để lại thông tin liên hệ. Sơn La Food sẽ xác nhận món còn hàng, số lượng, cách đóng gói, thời gian giao và gợi ý thay thế nếu sản phẩm theo mùa chưa sẵn.",
   consultPoints: [
     "Không cần thanh toán ngay trên website",
     "Có thể đổi món theo khẩu vị hoặc ngân sách",
-    "Phù hợp demo cho gian hàng đặc sản Sơn La",
+    "Xác nhận giá, số lượng và thời gian giao trước khi gửi hàng",
   ],
 };
 
 const zhPackageDetailContent: Omit<PackageDetailContent, "gallery" | "seoTitle" | "seoDescription" | "bannerImageUrl"> = {
-  overviewSuffix: "此演示模板适用于所有产品详情页，重点展示产地、风味、包装方式和下单咨询流程。正式运营时可替换为每个商户的真实数据。",
+  overviewSuffix: "Sơn La Food 清楚介绍每款产品的产地、风味、包装规格和保存方法，并在您下单前提供选购建议。",
   moments: [
     {
       title: "清晰的地方特产组合",
@@ -107,15 +107,63 @@ const zhPackageDetailContent: Omit<PackageDetailContent, "gallery" | "seoTitle" 
   ],
   benefits: [
     "按购买需求分组，便于快速选品。",
-    "内容可扩展给多个本地商户共同销售。",
-    "适合演示查看产品、加入购物车和提交咨询的流程。",
+    "产品精选自山罗本地生产户。",
+    "下单简单：加入购物车并提交请求，工作人员会致电确认。",
   ],
   consultTitle: "保留此产品，并获取合适的下单建议。",
   consultCopy: "留下联系方式后，Sơn La Food 会确认库存、数量、包装、配送时间，并在时令产品暂缺时提供替代建议。",
   consultPoints: [
     "网站无需立即付款",
     "可按口味或预算替换产品",
-    "适合山罗特产店铺演示",
+    "发货前确认价格、数量和配送时间",
+  ],
+};
+
+const enPackageDetailContent: Omit<PackageDetailContent, "gallery" | "seoTitle" | "seoDescription" | "bannerImageUrl"> = {
+  overviewSuffix: "Sơn La Food explains the origin, flavour, packing and storage of every product, and helps you choose the right items before you order.",
+  moments: [
+    {
+      title: "Clear specialty ingredients",
+      description: "Each combo may include smoked meat, chẩm chéo dipping sauce, mắc khén pepper, Shan tuyết tea, dried fruit or seasonal produce from Sơn La.",
+    },
+    {
+      title: "Great to try or to give",
+      description: "Products are suggested for everyday meals, gifts, bulk orders or small packs to share with friends.",
+    },
+    {
+      title: "Storage guidance included",
+      description: "We remind you how to store, reheat, mix dipping sauces and pair dishes so the Northwest flavour stays intact after delivery.",
+    },
+  ],
+  offers: [
+    "Free advice on building a set for your taste, budget and occasion.",
+    "Combo contents may change with the season and actual stock.",
+    "Help choosing gift boxes, paper bags or shipping packaging.",
+  ],
+  included: [
+    "Product origin information",
+    "Taste suggestions",
+    "Basic packing",
+    "Storage guidance after delivery",
+    "Substitution advice when out of stock",
+    "Price and quantity confirmed before delivery",
+  ],
+  itinerary: [
+    "Step 1: Choose products or combos, the expected quantity and whether it is for yourself or a gift.",
+    "Step 2: Sơn La Food confirms stock, season, packing and the estimated cost.",
+    "Step 3: We finalise the order, send storage tips and schedule a suitable delivery time.",
+  ],
+  benefits: [
+    "Easy to choose thanks to products grouped by need.",
+    "Products are sourced from local producers in Sơn La.",
+    "Simple ordering: add to cart and send a request, our staff will call to confirm.",
+  ],
+  consultTitle: "Save this product and get advice on your order.",
+  consultCopy: "Just leave your contact details. Sơn La Food will confirm availability, quantity, packing and delivery time, and suggest alternatives if a seasonal product is not ready yet.",
+  consultPoints: [
+    "No online payment required",
+    "Swap items to suit your taste or budget",
+    "Price, quantity and delivery time confirmed before shipping",
   ],
 };
 
@@ -136,11 +184,12 @@ export function normalizePackageDetailContent(value: unknown): PackageDetailCont
 }
 
 export function localizePackageDetailContent(content: PackageDetailContent, locale: string): PackageDetailContent {
-  if (locale !== "zh-CN") return content;
+  const localized = locale === "zh-CN" ? zhPackageDetailContent : locale === "en" ? enPackageDetailContent : null;
+  if (!localized) return content;
 
   return {
     ...content,
-    ...zhPackageDetailContent,
+    ...localized,
     gallery: content.gallery,
     seoTitle: content.seoTitle,
     seoDescription: content.seoDescription,

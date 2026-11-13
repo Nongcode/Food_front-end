@@ -10,6 +10,8 @@ export type PublicPackage = {
   rawDestination: string;
   duration: string;
   price: string;
+  priceValue?: number | null;
+  priceUnit?: string | null;
   summary: string;
   description: string;
   minPeople?: number | null;
@@ -39,6 +41,8 @@ function fromStaticPackage(item: any): PublicPackage {
     rawDestination: item.destination,
     duration: item.duration,
     price: item.price || "",
+    priceValue: null,
+    priceUnit: null,
     summary: item.summary,
     description: item.description || item.summary,
     minPeople: null,

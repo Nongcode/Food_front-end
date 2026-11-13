@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/api/:path*", destination: `${backendUrl}/api/:path*` },
       { source: "/admin/:path*", destination: `${backendUrl}/admin/:path*` },
+      // File tĩnh của BE (BE đặt assetPrefix "/be-static") — cần cho trang /admin mở qua domain FE
+      { source: "/be-static/:path+", destination: `${backendUrl}/be-static/:path+` },
       { source: "/uploads/:path*", destination: `${backendUrl}/uploads/:path*` },
     ];
   },

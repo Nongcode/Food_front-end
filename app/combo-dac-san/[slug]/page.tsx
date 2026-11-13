@@ -1,10 +1,11 @@
-import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, indexRobots, publicAlternates } from "@/lib/seo";
+import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, indexRobots, publicAlternates, pageTitle } from "@/lib/seo";
 import { headers } from "next/headers";
 import { isSitePageInactive } from "@/lib/siteSettings";
 import { PageDisabled } from "../../components/PageDisabled";
 import { notFound } from "next/navigation";
 import { JsonLd } from "../../components/JsonLd";
 import { LeadForm } from "../../components/LeadForm";
+import { DetailAddToCartButton } from "../../components/DetailAddToCartButton";
 import { PackageDetailGallery } from "../../components/PackageDetailGallery";
 import { SiteHeader } from "../../components/SiteHeader";
 import { packageDetailExtras, packageDetailMediaBySlug } from "../../data/food";
@@ -12,12 +13,14 @@ import { normalizeLocale } from "@/lib/i18n/config";
 import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
 import { localizePackageDetailContent, normalizePackageDetailContent } from "@/lib/packageDetailContent";
 import { getPublicPackageBySlug, getPublicPackages } from "@/lib/packages";
+import { formatProductPrice } from "@/lib/customerOrders";
 
 type PackageDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
 import { getStatusStyleAndLabel } from "@/lib/status";
+import { backgroundWithFallback } from "@/lib/imageFallback";
 
 export async function generateStaticParams() {
   const packages = await getPublicPackages("vi");
@@ -29,7 +32,7 @@ export async function generateMetadata({ params }: PackageDetailPageProps) {
   const item = await getPublicPackageBySlug(slug, "vi");
 
   if (!item) {
-    return { title: "Không tìm thấy combo đặc sản | Sơn La Food" };
+    return { title: "Không tìm thấy combo đặc sản" };
   }
 
   const title = item.name + " | Sơn La Food";
@@ -39,7 +42,7 @@ export async function generateMetadata({ params }: PackageDetailPageProps) {
   const imageUrl = item.image || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
 
   return {
-    title,
+    title: pageTitle(title),
     description,
     alternates: publicAlternates(path),
     openGraph: {
@@ -84,13 +87,18 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
   const gallery = detailGallery.length ? detailGallery : media?.gallery?.length ? media.gallery : [item.image, ...packageDetailExtras.gallery].slice(0, 5);
   const flexibleConsulting = t("packageDetail", "flexible", "Tư vấn linh hoạt");
   const { statusClass, statusLabel } = getStatusStyleAndLabel(item.status, locale, t);
-  const peopleRange = item.peopleNote || (item.minPeople && item.maxPeople ? `${item.minPeople} - ${item.maxPeople} khách` : item.minPeople ? `Từ ${item.minPeople} khách` : "");
+  // Combo đồ ăn: tính theo số người dùng (không phải "khách" du lịch)
+  const peopleRange = item.peopleNote || (item.minPeople && item.maxPeople
+    ? local({ vi: `${item.minPeople} - ${item.maxPeople} người`, en: `${item.minPeople} - ${item.maxPeople} people`, "zh-CN": `${item.minPeople} - ${item.maxPeople} 人` })
+    : item.minPeople ? local({ vi: `Từ ${item.minPeople} người`, en: `From ${item.minPeople} people`, "zh-CN": `${item.minPeople} 人起` }) : "");
+  // Giá hiển thị lấy từ priceValue/priceUnit (giá BE tính đơn), chuỗi price chỉ dùng khi chưa có giá số
+  const displayPrice = formatProductPrice(item.priceValue, item.priceUnit, item.price, t("cart", "price_contact", "Giá liên hệ"));
   const quickFacts = [
     { icon: "calendar", label: t("packageDetail", "duration", "Thời lượng"), value: item.duration },
     { icon: "pin", label: t("packageDetail", "destination", "Vùng đặc sản"), value: item.destination },
     ...(peopleRange ? [{ icon: "spark", label: t("packageDetail", "people", "Số người phù hợp"), value: peopleRange }] : []),
     { icon: "spark", label: t("packageDetail", "type", "Hình thức"), value: flexibleConsulting },
-    { icon: "wallet", label: t("packageDetail", "budget", "Ngân sách"), value: item.price },
+    { icon: "wallet", label: t("packageDetail", "budget", "Ngân sách"), value: displayPrice },
   ];
   const experienceMoments = detailContent.moments.map((moment, index) => ({
     ...moment,
@@ -100,6 +108,17 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://timesgreen.net";
   const canonicalUrl = `${baseUrl}/combo-dac-san/${item.slug}`;
   const packageImage = item.image || `${baseUrl}/sonla-logo-readable.png`;
+  const detailCartItem = {
+    id: `package:${item.slug}`,
+    slug: item.slug,
+    name: item.name,
+    seller: item.destination || "S\u01a1n La Food",
+    note: item.summary || item.description || "",
+    image: item.image || packageImage,
+    price: item.priceValue ?? 0,
+    priceText: displayPrice,
+    type: "package" as const,
+  };
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -116,7 +135,7 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
         offers: {
           "@type": "Offer",
           priceCurrency: "VND",
-          price: item.price ? item.price.replace(/[^0-9]/g, "") || "0" : "0",
+          price: String(item.priceValue ?? 0),
           availability: "https://schema.org/InStock",
           url: canonicalUrl,
         },
@@ -152,8 +171,8 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
       <SiteHeader variant="hero" />
 
       <section className="page-hero detail-hero" style={{ backgroundImage: "linear-gradient(90deg, rgba(10, 20, 17, 0.78), rgba(10, 20, 17, 0.26)), url(" + (detailContent.bannerImageUrl || media?.banner || gallery[0]) + ")" }}>
-        <p className="eyebrow">{t("packageDetail", "hero_eyebrow", "Vùng đặc sản")}</p>
-        <h1>{item.destination}</h1>
+        <p className="eyebrow">{item.destination || t("packageDetail", "hero_eyebrow", "Vùng đặc sản")}</p>
+        <h1>{item.name}</h1>
         <p>{t("packageDetail", "hero_copy", "Nguồn gốc, hương vị và cách dùng phù hợp nhất với combo đặc sản này.")}</p>
       </section>
 
@@ -163,8 +182,8 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
           <h2>{item.name}</h2>
           <p>{item.description || item.summary}</p>
           <div className="detail-hero-actions">
-            <a href="#detail-consult">{t("packageDetail", "consult_now", "Nhận tư vấn ngay")}</a>
-            <span>{item.price}</span>
+            <DetailAddToCartButton item={detailCartItem} />
+            <span>{displayPrice}</span>
           </div>
 
           <div className="detail-quick-facts">
@@ -186,20 +205,20 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
       <section className="package-detail-shell">
         <aside className="detail-summary-card">
           <span className={statusClass}>{statusLabel}</span>
-          <h2>{item.price}</h2>
+          <h2>{displayPrice}</h2>
           <dl>
             <div><dt>{t("packageDetail", "destination", "Vùng đặc sản")}</dt><dd>{item.destination}</dd></div>
             <div><dt>{t("packageDetail", "duration", "Thời gian")}</dt><dd>{item.duration}</dd></div>
             {peopleRange && <div><dt>{t("packageDetail", "people", "Số người phù hợp")}</dt><dd>{peopleRange}</dd></div>}
             <div><dt>{t("packageDetail", "type", "Hình thức")}</dt><dd>{flexibleConsulting}</dd></div>
           </dl>
-          <a href="#detail-consult">{local({ vi: "Gửi yêu cầu tư vấn", en: "Send consultation request", "zh-CN": "发送咨询请求" })}</a>
+          <DetailAddToCartButton item={detailCartItem} />
         </aside>
 
         <div className="detail-content">
           <section>
             <p className="eyebrow">{local({ vi: "Tổng quan", en: "Overview", "zh-CN": "概览" })}</p>
-            <h2>{local({ vi: "Thông tin sản phẩm demo", en: "Product demo information", "zh-CN": "产品演示信息" })}</h2>
+            <h2>{local({ vi: "Thông tin sản phẩm", en: "Product information", "zh-CN": "产品信息" })}</h2>
             <p>{item.description || item.summary} {detailContent.overviewSuffix}</p>
           </section>
 
@@ -209,7 +228,7 @@ export default async function PackageDetailPage({ params }: PackageDetailPagePro
             <div className="detail-experience-grid">
               {experienceMoments.map((moment, index) => (
                 <article className="detail-experience-card" key={`${moment.title}-${index}`}>
-                  <div className="detail-experience-image" style={{ backgroundImage: "url(" + moment.image + ")" }} />
+                  <div className="detail-experience-image" style={{ backgroundImage: backgroundWithFallback(moment.image) }} />
                   <div className="detail-experience-copy"><h3>{moment.title}</h3><p>{moment.description}</p></div>
                 </article>
               ))}

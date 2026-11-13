@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { absoluteUrl, publicPageMetadata } from "@/lib/seo";
 import { headers } from "next/headers";
 import { isSitePageInactive } from "@/lib/siteSettings";
@@ -8,6 +9,7 @@ import { SiteHeader } from "../components/SiteHeader";
 import { destinations } from "../data/food";
 import { normalizeLocale } from "@/lib/i18n/config";
 import { getStaticTranslationMap, translateFromMap } from "@/lib/i18n/server";
+import { getPageTranslator } from "@/lib/i18n/pageCopy";
 import { getPublicPackageCollections, getPublicPackages } from "@/lib/packages";
 import { ensureFullProductCollections } from "@/lib/productCategoryCollections";
 
@@ -18,11 +20,14 @@ type PackagesPageProps = {
 };
 
 export const dynamic = "force-dynamic";
-export const metadata = publicPageMetadata({
-  title: "Sản phẩm đặc sản Sơn La & set quà Tây Bắc | Sơn La Food",
-  description: "Khám phá sản phẩm đặc sản Sơn La theo danh mục, hộ bán, quà biếu Tây Bắc, gia vị, trà và nông sản theo mùa.",
-  path: "/combo-dac-san",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const { tr } = await getPageTranslator("packages");
+  return publicPageMetadata({
+    title: tr("meta_title", "Sản phẩm đặc sản Sơn La & set quà Tây Bắc"),
+    description: tr("meta_description", "Khám phá sản phẩm đặc sản Sơn La theo danh mục, hộ bán, quà biếu Tây Bắc, gia vị, trà và nông sản theo mùa."),
+    path: "/combo-dac-san",
+  });
+}
 
 
 export default async function PackagesPage({ searchParams }: PackagesPageProps) {
