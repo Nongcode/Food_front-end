@@ -44,3 +44,6 @@ Không đổi. `index.html` mô tả cấu trúc repo và tiến độ.
 | Task | File:dòng | Thay đổi | Lý do |
 |---|---|---|---|
 | T-001.1 | FE commit 7aa017a, b310641 | Commit code + docs; `main` FE/BE fast-forward tới feature | Gộp từ `main` theo lựa chọn của người dùng |
+| T-001.2 | `D:/Duc-TPE/sonla-food` (.gitignore gốc, frontend/, backend/) | Repo mới, lịch sử 2 repo qua git mv + pull --allow-unrelated-histories | Giữ blame/log qua mốc gộp |
+| T-001.3 | `package.json`, `scripts/dev.mjs`, `README.md`, `frontend/.env.example`, `backend/.env.example` | Lệnh chung `npm --prefix`; dev.mjs spawn 2 dev server, taskkill /T trên Windows | Không thêm thư viện |
+| T-001.4 | `CLAUDE.md` (mục Cấu trúc repo + Lệnh kiểm tra), `AGENTS.md`, `docs/features/README.md:5`, `frontend/CLAUDE.md` | Chuyển tài liệu lên gốc | Một nơi duy nhất cho quy trình |
