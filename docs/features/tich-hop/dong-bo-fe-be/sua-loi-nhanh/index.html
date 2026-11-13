@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sửa lỗi nhanh FE ↔ BE</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #fff; --text: #1d2330; --muted: #667085; --border: #e3e6ea;
+    --accent: #2563eb; --ok: #16a34a; --warn: #d97706; --err: #dc2626; --changed: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --surface: #1b1f27; --text: #e6e8ec; --muted: #98a2b3; --border: #2c323d;
+      --accent: #60a5fa; --ok: #4ade80; --warn: #fbbf24; --err: #f87171; --changed: #3b3214;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  header { padding: 20px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0 0 4px; font-size: 20px; }
+  .meta { color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid currentColor; }
+  .s-doing { color: var(--warn); } .s-done { color: var(--ok); } .s-todo { color: var(--muted); } .s-blocked { color: var(--err); }
+  nav { display: flex; gap: 4px; padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px; color: var(--muted); font: inherit; cursor: pointer; white-space: nowrap; }
+  nav button[aria-selected="true"] { color: var(--accent); border-color: var(--accent); }
+  main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+  section[hidden] { display: none; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 12px; font-size: 16px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .next { border-left: 4px solid var(--warn); }
+  .legend { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  /* Đánh dấu phần giao diện thay đổi trong yêu cầu hiện tại: thêm class="changed" */
+  .changed { outline: 2px dashed var(--warn); outline-offset: 2px; background: var(--changed); }
+  /* ===== Prototype ===== */
+  .proto { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+  .proto-toolbar { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .proto input, .proto select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
+  .proto .btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; font: inherit; }
+  .proto .btn.secondary { background: transparent; color: var(--accent); }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  @media (max-width: 640px) { main, header { padding: 16px; } nav { padding: 0 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Sửa lỗi nhanh FE ↔ BE</h1>
+  <div class="meta">
+    <span>Module: <code>tich-hop/dong-bo-fe-be</code></span>
+    <span>Trạng thái: <span class="badge s-doing" id="overall">🟡 IN_PROGRESS</span></span>
+    <span>Cập nhật: <span id="updated">2026-11-11 11:20</span></span>
+  </div>
+</header>
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-tab="ui">Giao diện</button>
+  <button role="tab" aria-selected="false" data-tab="func">Chức năng &amp; API</button>
+  <button role="tab" aria-selected="false" data-tab="progress">Tiến độ</button>
+</nav>
+<main>
+  <section id="ui">
+    <p class="legend">Yêu cầu CR-001 không đổi bố cục giao diện. Vùng viền vàng = hành vi thay đổi.</p>
+    <div class="proto" data-testid="prototype">
+      <div class="proto-toolbar"><strong>Form đánh giá (ReviewForm)</strong></div>
+      <div style="padding:12px" class="grid-2">
+        <input placeholder="Họ và tên" aria-label="Họ và tên">
+        <input placeholder="Email" aria-label="Email">
+        <input placeholder="Số điện thoại" aria-label="Số điện thoại">
+        <select aria-label="Combo"><option>Combo đặc sản Sơn La dùng thử</option></select>
+      </div>
+      <div style="padding:0 12px 12px">
+        <button class="btn">Gửi đánh giá ngay</button>
+        <p class="changed" style="padding:6px">Sau khi gửi thành công: form reset + trang tải lại. Không còn hiện "Không thể kết nối đến máy chủ".</p>
+      </div>
+    </div>
+    <div class="card changed" style="margin-top:16px">
+      <h2>Đăng nhập admin qua FE</h2>
+      <p><code>localhost:3000/admin/*</code> → chuyển thẳng sang BE; BE tự kiểm tra <code>admin_token</code>. FE không còn tự xoá cookie / chuyển hướng.</p>
+    </div>
+  </section>
+  <section id="func" hidden>
+    <div class="card"><h2>Chức năng</h2>
+      <table><thead><tr><th>Chức năng</th><th>Mô tả</th></tr></thead><tbody>
+        <tr><td>Bảo vệ /admin</td><td>Chỉ BE kiểm tra JWT (T5)</td></tr>
+        <tr><td>Gửi review</td><td>Sửa lỗi currentTarget, avatar = null (T14)</td></tr>
+        <tr><td>Schema</td><td>Default status đúng tiếng Việt (T14)</td></tr>
+      </tbody></table></div>
+    <div class="card"><h2>API</h2>
+      <table><thead><tr><th>Method</th><th>Path</th><th>Quyền</th><th>Mô tả</th></tr></thead><tbody>
+        <tr><td><code>POST</code></td><td><code>/api/reviews</code></td><td>public</td><td>Tạo review — không còn sinh avatar ngẫu nhiên</td></tr>
+      </tbody></table></div>
+  </section>
+  <section id="progress" hidden>
+    <div class="card next"><h2>Bước tiếp theo</h2><p id="next">Xong CR-002. Tiếp: mo-hinh-du-lieu (folder cha)</p></div>
+    <div class="card"><h2>CR-001 — Sửa T5 + T14</h2>
+      <table><thead><tr><th>ID</th><th>Task</th><th>Trạng thái</th><th>Test</th></tr></thead><tbody>
+        <tr><td>T-001.1</td><td>FE proxy bỏ kiểm tra admin_token, xoá lib admin thừa</td><td><span class="badge s-done" id="st-1">✅ DONE</span></td><td id="te-1">TC-01, TC-02 (curl)</td></tr>
+        <tr><td>T-001.2</td><td>ReviewForm currentTarget null</td><td><span class="badge s-done" id="st-2">✅ DONE</span></td><td id="te-2">TC-03 Playwright</td></tr>
+        <tr><td>T-001.3</td><td>BE review avatar null</td><td><span class="badge s-done" id="st-3">✅ DONE</span></td><td id="te-3">TC-03</td></tr>
+        <tr><td>T-001.4</td><td>Schema default mojibake</td><td><span class="badge s-done" id="st-4">✅ DONE</span></td><td id="te-4">prisma validate</td></tr>
+      </tbody></table></div>
+    <div class="card"><h2>CR-002 — T16, T17, bảo mật token admin</h2>
+      <table><thead><tr><th>ID</th><th>Task</th><th>Trạng thái</th><th>Test</th></tr></thead><tbody>
+        <tr><td>T-002.1</td><td>Khử trùng tên package trong form (T16)</td><td><span class="badge s-done" id="st-5">✅ DONE</span></td><td id="te-5">TC-04 Playwright</td></tr>
+        <tr><td>T-002.2</td><td>Bảo vệ route seed banner (T17)</td><td><span class="badge s-done" id="st-6">✅ DONE</span></td><td id="te-6">TC-05 curl</td></tr>
+        <tr><td>T-002.3</td><td>Gia cố token admin (aud + JWT_SECRET)</td><td><span class="badge s-done" id="st-7">✅ DONE</span></td><td id="te-7">TC-06 curl, TC-07 Playwright (:3001)</td></tr>
+      </tbody></table></div>
+  </section>
+</main>
+<script>
+  const tabs = document.querySelectorAll('nav [role="tab"]');
+  function show(id) {
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === id)));
+    document.querySelectorAll('main > section').forEach(s => { s.hidden = s.id !== id; });
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+  if (location.hash && document.getElementById(location.hash.slice(1))) show(location.hash.slice(1));
+</script>
+</body>
+</html>

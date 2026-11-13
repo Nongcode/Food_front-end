@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đồng bộ FE ↔ BE</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #fff; --text: #1d2330; --muted: #667085; --border: #e3e6ea;
+    --accent: #2563eb; --ok: #16a34a; --warn: #d97706; --err: #dc2626; --changed: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --surface: #1b1f27; --text: #e6e8ec; --muted: #98a2b3; --border: #2c323d;
+      --accent: #60a5fa; --ok: #4ade80; --warn: #fbbf24; --err: #f87171; --changed: #3b3214;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  header { padding: 20px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0 0 4px; font-size: 20px; }
+  .meta { color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid currentColor; }
+  .s-doing { color: var(--warn); } .s-done { color: var(--ok); } .s-todo { color: var(--muted); } .s-blocked { color: var(--err); }
+  nav { display: flex; gap: 4px; padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px; color: var(--muted); font: inherit; cursor: pointer; white-space: nowrap; }
+  nav button[aria-selected="true"] { color: var(--accent); border-color: var(--accent); }
+  main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+  section[hidden] { display: none; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 12px; font-size: 16px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .next { border-left: 4px solid var(--warn); }
+  .legend { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  /* Đánh dấu phần giao diện thay đổi trong yêu cầu hiện tại: thêm class="changed" */
+  .changed { outline: 2px dashed var(--warn); outline-offset: 2px; background: var(--changed); }
+  /* ===== Prototype ===== */
+  .proto { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+  .proto-toolbar { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .proto input, .proto select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
+  .proto .btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; font: inherit; }
+  .proto .btn.secondary { background: transparent; color: var(--accent); }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  @media (max-width: 640px) { main, header { padding: 16px; } nav { padding: 0 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Đồng bộ FE ↔ BE</h1>
+  <div class="meta">
+    <span>Module: <code>tich-hop</code></span>
+    <span>Trạng thái: <span class="badge s-doing">🟡 IN_PROGRESS</span></span>
+    <span>Cập nhật: 2026-11-11 10:35</span>
+  </div>
+</header>
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-tab="children">Chức năng con</button>
+  <button role="tab" aria-selected="false" data-tab="func">Xung đột</button>
+  <button role="tab" aria-selected="false" data-tab="progress">Tiến độ</button>
+</nav>
+<main>
+  <section id="children">
+    <p class="legend">Kiến trúc: Trình duyệt → FE :3000 (SSR + rewrite /api, /admin) → BE :3001 (Next + Prisma + Postgres).</p>
+    <div class="grid-2">
+      <a class="card" href="sua-loi-nhanh/index.html" style="text-decoration:none;color:inherit"><h2>1. Sửa lỗi nhanh (T5, T14)</h2><span class="badge s-done">✅ DONE</span></a>
+      <a class="card" href="mo-hinh-du-lieu/index.html" style="text-decoration:none;color:inherit"><h2>2. Mô hình dữ liệu (T1, T4, T6, T8, T9)</h2><span class="badge s-doing">🟡 Chờ duyệt spec</span></a>
+      <div class="card"><h2>3. API backend</h2><span class="badge s-todo">⬜ TODO</span></div>
+      <div class="card"><h2>4. FE dùng API (T2, T3, T7)</h2><span class="badge s-todo">⬜ TODO</span></div>
+      <div class="card"><h2>5. Dọn URL / nội dung (T10–T13, T16)</h2><span class="badge s-todo">⬜ TODO</span></div>
+      <div class="card"><h2>Triển khai (T15)</h2><span class="badge s-blocked">🔴 BLOCKED — chờ xác nhận</span></div>
+    </div>
+  </section>
+  <section id="func" hidden>
+    <div class="card"><h2>Danh sách xung đột</h2>
+      <table><thead><tr><th>ID</th><th>Mô tả</th><th>Trạng thái</th></tr></thead><tbody>
+        <tr><td>T1</td><td>Tài khoản khách chỉ ở localStorage</td><td><span class="badge s-todo">⬜</span></td></tr>
+        <tr><td>T2</td><td>Đặt hàng báo thành công trước khi API trả về</td><td><span class="badge s-todo">⬜</span></td></tr>
+        <tr><td>T3</td><td>Huỷ/sửa đơn chỉ ở localStorage</td><td><span class="badge s-todo">⬜</span></td></tr>
+        <tr><td>T4</td><td>Trạng thái đơn FE ≠ BE</td><td><span class="badge s-todo">⬜</span></td></tr>
+        <tr><td>T5</td><td>Vòng lặp đăng nhập admin (JWT_SECRET)</td><td><span class="badge s-done">✅</span></td></tr>
+        <tr><td>T6</td><td>Booking là model tour</td><td><span class="badge s-todo">⬜</span></td></tr>
+        <tr><td>T7</td><td>LeadForm và giỏ hàng chung API</td><td><span class="badge s-todo">⬜</span></td></tr>
+        <tr><td>T8</td><td>Giá dạng chuỗi</td><td><span class="badge s-todo">⬜</span></td></tr>
+        <tr><td>T9</td><td>totalBookings tăng theo email</td><td><span class="badge s-todo">⬜</span></td></tr>
+        <tr><td>T10–T13</td><td>URL /goi-du-lich, nhãn, slug fallback, dịch review cứng</td><td><span class="badge s-todo">⬜</span></td></tr>
+        <tr><td>T14</td><td>Lỗi nhỏ (ReviewForm, avatar, mojibake, code admin thừa)</td><td><span class="badge s-done">✅</span></td></tr>
+        <tr><td>T15</td><td>Workflow deploy FE trùng BE</td><td><span class="badge s-blocked">🔴</span></td></tr>
+        <tr><td>T16</td><td>Package trùng tên → lỗi React key</td><td><span class="badge s-todo">⬜</span></td></tr>
+      </tbody></table></div>
+  </section>
+  <section id="progress" hidden>
+    <div class="card next"><h2>Bước tiếp theo</h2><p>Brainstorming thiết kế dữ liệu (T1, T4, T6, T8, T9) cùng người dùng</p></div>
+  </section>
+</main>
+<script>
+  const tabs = document.querySelectorAll('nav [role="tab"]');
+  function show(id) {
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === id)));
+    document.querySelectorAll('main > section').forEach(s => { s.hidden = s.id !== id; });
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+  if (location.hash && document.getElementById(location.hash.slice(1))) show(location.hash.slice(1));
+</script>
+</body>
+</html>

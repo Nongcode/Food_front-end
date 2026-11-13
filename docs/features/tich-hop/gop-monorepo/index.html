@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gộp FE + BE thành monorepo</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #fff; --text: #1d2330; --muted: #667085; --border: #e3e6ea;
+    --accent: #2563eb; --ok: #16a34a; --warn: #d97706; --err: #dc2626; --changed: #fef3c7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --surface: #1b1f27; --text: #e6e8ec; --muted: #98a2b3; --border: #2c323d;
+      --accent: #60a5fa; --ok: #4ade80; --warn: #fbbf24; --err: #f87171; --changed: #3b3214;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  header { padding: 20px 24px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0 0 4px; font-size: 20px; }
+  .meta { color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid currentColor; }
+  .s-doing { color: var(--warn); } .s-done { color: var(--ok); } .s-todo { color: var(--muted); } .s-blocked { color: var(--err); }
+  nav { display: flex; gap: 4px; padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  nav button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px; color: var(--muted); font: inherit; cursor: pointer; white-space: nowrap; }
+  nav button[aria-selected="true"] { color: var(--accent); border-color: var(--accent); }
+  main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+  section[hidden] { display: none; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 12px; font-size: 16px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .next { border-left: 4px solid var(--warn); }
+  .legend { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  /* Đánh dấu phần giao diện thay đổi trong yêu cầu hiện tại: thêm class="changed" */
+  .changed { outline: 2px dashed var(--warn); outline-offset: 2px; background: var(--changed); }
+  /* ===== Prototype ===== */
+  .proto { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+  .proto-toolbar { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .proto input, .proto select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
+  .proto .btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; font: inherit; }
+  .proto .btn.secondary { background: transparent; color: var(--accent); }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  @media (max-width: 640px) { main, header { padding: 16px; } nav { padding: 0 16px; } }
+</style>
+</head>
+<body>
+<header>
+<header>
+  <h1>Gộp FE + BE thành monorepo (CR-001)</h1>
+  <div class="meta">
+    <span>Module: <code>tich-hop/gop-monorepo</code></span>
+    <span>Trạng thái: <span class="badge s-doing" id="overall">🟡 IN_PROGRESS</span></span>
+    <span>Cập nhật: <span id="updated">2026-11-13 14:20</span></span>
+  </div>
+</header>
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-tab="ui">Cấu trúc repo</button>
+  <button role="tab" aria-selected="false" data-tab="func">Lệnh chung</button>
+  <button role="tab" aria-selected="false" data-tab="progress">Tiến độ</button>
+</nav>
+<main>
+  <section id="ui">
+    <p class="legend">Không đổi giao diện người dùng. Viền vàng = phần mới trong CR-001.</p>
+    <div class="grid-2">
+      <div class="card"><h2>Trước</h2><pre><code>D:\Duc-TPE\
+├── sonla-food-frontend\   (git, remote Food_front-end)
+│   └── docs\features\
+└── sonla-food-backend\    (git, chưa có remote)</code></pre></div>
+      <div class="card changed"><h2>Sau</h2><pre><code>D:\Duc-TPE\sonla-food\    (git, nhánh main)
+├── frontend\     Next.js :3000 (lịch sử FE)
+├── backend\      Next.js :3001 + Prisma (lịch sử BE)
+├── docs\features\
+├── scripts\dev.mjs
+├── package.json  (chỉ scripts)
+└── CLAUDE.md · AGENTS.md · README.md</code></pre></div>
+    </div>
+  </section>
+  <section id="func" hidden>
+    <div class="card changed"><h2>Lệnh ở thư mục gốc</h2><table><thead><tr><th>Lệnh</th><th>Việc làm</th></tr></thead><tbody>
+      <tr><td><code>npm run install:all</code></td><td>npm install trong frontend/ và backend/</td></tr>
+      <tr><td><code>npm run dev</code></td><td>Chạy FE :3000 + BE :3001 song song (log có tiền tố [fe]/[be])</td></tr>
+      <tr><td><code>npm run dev:fe</code> · <code>dev:be</code></td><td>Chạy riêng một bên</td></tr>
+      <tr><td><code>npm run build</code> · <code>lint</code> · <code>typecheck</code></td><td>Chạy cho cả hai</td></tr>
+      <tr><td><code>npm run test</code></td><td>BE test:unit + test:api</td></tr>
+    </tbody></table></div>
+  </section>
+  <section id="progress" hidden>
+    <div class="card next"><h2>Bước tiếp theo</h2><p id="next">T-001.1 — commit FE, merge feature → main ở FE và BE (chờ duyệt plan)</p></div>
+    <div class="card" id="tasks"><h2>Task CR-001</h2><table><thead><tr><th>ID</th><th>Task</th><th>Trạng thái</th></tr></thead><tbody>
+<tr><td>T-001.1</td><td>Commit FE + merge feature → main</td><td><span class="badge s-todo" id="tk-1">⬜ TODO</span></td></tr>
+<tr><td>T-001.2</td><td>Tạo repo sonla-food giữ lịch sử</td><td><span class="badge s-todo" id="tk-2">⬜ TODO</span></td></tr>
+<tr><td>T-001.3</td><td>package.json gốc + dev.mjs + README</td><td><span class="badge s-todo" id="tk-3">⬜ TODO</span></td></tr>
+<tr><td>T-001.4</td><td>Chuyển CLAUDE.md + docs/features lên gốc</td><td><span class="badge s-todo" id="tk-4">⬜ TODO</span></td></tr>
+<tr><td>T-001.5</td><td>Cài đặt + kiểm thử</td><td><span class="badge s-todo" id="tk-5">⬜ TODO</span></td></tr>
+<tr><td>T-001.6</td><td>Chốt + bàn giao</td><td><span class="badge s-todo" id="tk-6">⬜ TODO</span></td></tr>
+</tbody></table></div>
+  </section>
+</main>
+<script>
+  const tabs = document.querySelectorAll('nav [role="tab"]');
+  function show(id) {
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === id)));
+    document.querySelectorAll('main > section').forEach(s => { s.hidden = s.id !== id; });
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+  if (location.hash && document.getElementById(location.hash.slice(1))) show(location.hash.slice(1));
+</script>
+</body>
+</html>
