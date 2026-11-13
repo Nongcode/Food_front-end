@@ -11,7 +11,7 @@
 | Bước Superpowers | executing-plans → review cuối → finishing-a-development-branch |
 | Task đang làm | xem `mo-hinh-du-lieu/status.md` |
 | **Bước tiếp theo** | Review cuối CR-001, rồi người dùng quyết định commit FE / merge nhánh |
-| Branch | FE `feature/tai-khoan-don-hang` (chưa commit); BE `feature/tai-khoan-don-hang` (4e1f187) |
+| Branch | Monorepo `D:/Duc-TPE/sonla-food` nhánh `main` (FE+BE đã commit, feature đã merge vào main ngày 2026-11-13) |
 | Cập nhật lần cuối | 2026-11-11 11:51 |
 | Ghi chú dở dang | T15 (deploy) chờ người dùng xác nhận cấu hình server; T18 làm trong `sua-loi-qa` (T-002.1) |
 
@@ -45,3 +45,4 @@
 - 2026-11-11 09:50 — Khảo sát 2 repo, lập danh sách T1–T15, init `docs/features`, backup BE.
 - 2026-11-11 11:35 — `sua-loi-nhanh` CR-002 ✅ DONE (T16, T17, token admin). Phát hiện T18.
 - 2026-11-11 10:35 — `sua-loi-nhanh` (CR-001) ✅ DONE. Phát hiện thêm T16: danh sách package có tên trùng ("Combo trái cây Yên Châu theo mùa") gây lỗi React key ở /lien-he.
+- 2026-11-13 14:44 — Đã gộp FE + BE thành monorepo (xem [gop-monorepo](../gop-monorepo/status.md)); feature/tai-khoan-don-hang đã merge vào main ở cả 2 repo cũ. T15 (deploy) cần viết lại cho cấu trúc frontend/ + backend/.

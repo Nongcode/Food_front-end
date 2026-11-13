@@ -7,7 +7,7 @@
 
 | Mục | Giá trị |
 |---|---|
-| Trạng thái | 🟡 IN_PROGRESS |
+| Trạng thái | ✅ DONE |
 | Yêu cầu đang làm | CR-001 — Gộp FE + BE thành monorepo (cách A) |
 | Bước Superpowers | Không áp dụng đủ chuỗi (thay đổi cấu trúc repo, không thêm màn hình/API/model) |
 | Task đang làm | T-001.6 |
@@ -35,7 +35,7 @@
 | T-001.3 | `package.json` gốc + `scripts/dev.mjs` + README | ✅ DONE | Bỏ qua Playwright: chỉ thêm cấu hình/lệnh, chạy thật ở T-001.5. node --check dev.mjs OK; npm run liệt kê 11 lệnh | Commit 11f71d2. Thêm frontend/.env.example, backend/.env.example (git add -f, giá trị mẫu) |
 | T-001.4 | Chuyển `CLAUDE.md` + `docs/features` lên gốc | ✅ DONE | Bỏ qua Playwright: chỉ tài liệu. Kiểm: docs chỉ còn ở gốc (frontend/docs không còn), CLAUDE.md gốc có mục Cấu trúc repo + lệnh gốc | git mv frontend/docs → docs, frontend/CLAUDE.md → CLAUDE.md (frontend/CLAUDE.md mới = @AGENTS.md; backend giữ nguyên). AGENTS.md gốc trỏ tới node_modules của từng app. Memory chép sang projects/D--Duc-TPE-sonla-food |
 | T-001.5 | Cài đặt + kiểm thử (tsc, lint, build, test BE, Playwright) | ✅ DONE | typecheck FE+BE 0 lỗi; lint FE 12 vấn đề (3 lỗi cũ) / BE 106 (74 lỗi cũ) = baseline; build FE+BE OK; test:unit 23/23, test:api 40/40 (chạy 2 lần). Playwright: TC-01 8 URL 200, 0 lỗi console, 0 HTTP ≥400; TC-02 /admin/orders qua :3000 → /admin/login, 27 file /be-static 200, 0 lỗi; TC-03 đăng ký qa+mono@sonlafood.local → thêm combo → đơn SLF-20261113-0001 201 (590k+30k=620k) → khách thấy đơn "Awaiting confirmation"; TC-04 index.html 0 lỗi. dev.mjs: kill BE → FE tự dừng, exit 1 | Sửa install:all (npm --prefix X install thêm nhầm dep "sonla-food": "file:..") → cd X && npm install. Bước admin xác nhận đơn KHÔNG chạy: không có mật khẩu admin, tạo token admin bị chặn → người dùng tự kiểm. Đã dọn dữ liệu test (0 khách/đơn/yêu cầu @sonlafood.local), tắt dev server |
-| T-001.6 | Chốt + bàn giao | ⬜ TODO | | |
+| T-001.6 | Chốt + bàn giao | ✅ DONE | Bỏ qua Playwright: chỉ tài liệu. git status repo mới sạch | Việc người dùng: tạo remote GitHub + push; đăng nhập admin kiểm xác nhận đơn; lưu trữ 2 repo cũ; mở Claude Code ở D:/Duc-TPE/sonla-food |
 
 ## Kết quả test gần nhất
 
@@ -51,3 +51,4 @@
 - 2026-11-13 14:25 — T-001.3 ✅: package.json gốc, scripts/dev.mjs, README, .env.example (commit 11f71d2).
 - 2026-11-13 14:26 — T-001.4 ✅: docs/features + CLAUDE.md lên gốc monorepo; AGENTS.md gốc; memory chép sang project mới.
 - 2026-11-13 14:43 — T-001.5 ✅: cài + kiểm thử trong monorepo; sửa script install:all; dọn dữ liệu test.
+- 2026-11-13 14:44 — T-001.6 ✅: CR-001 DONE. Repo D:/Duc-TPE/sonla-food sẵn sàng; chưa có remote.
