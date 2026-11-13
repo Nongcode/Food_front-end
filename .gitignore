@@ -1,0 +1,12 @@
+# Thư viện (mỗi app có node_modules riêng)
+node_modules/
+
+# Biến môi trường — chỉ commit file mẫu
+.env*
+!.env.example
+
+# Log, file tạm của công cụ
+*.log
+.playwright-mcp/
+.superpowers/
+.DS_Store
