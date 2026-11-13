@@ -1,0 +1,53 @@
+"use client";
+
+import AdminSidebar from "./AdminSidebar";
+import AdminTopbar from "./AdminTopbar";
+import React from "react";
+import { usePathname } from "next/navigation";
+import styles from "./AdminShell.module.css";
+
+const emptySubscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
+export default function AdminShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/admin/login";
+  const isMounted = React.useSyncExternalStore(emptySubscribe, getClientSnapshot, getServerSnapshot);
+
+  if (!isMounted) {
+    // Tránh lỗi hydration bằng cách render nội dung rỗng trên server
+    return null;
+  }
+
+  if (isLoginPage) {
+    return (
+      <div className="min-h-screen bg-[#f7f3ea] text-[#17211d] antialiased">
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.root + " bg-[#fcf9f2] text-[#17211d] antialiased"}>
+      {/* Sidebar for Desktop */}
+      <aside className="hidden md:flex md:flex-col md:w-64 bg-[#083b31] text-white shrink-0 border-r border-[#17211d]/10 sticky top-0 h-screen">
+        <div className="px-6 py-5 flex items-center justify-between border-b border-white/10">
+          <img src="/sonla-logo-readable.png" alt="Sơn La Food" className="w-24 object-contain brightness-0 invert" />
+          <span className="text-[9px] bg-emerald-700/80 text-emerald-100 px-1.5 py-0.5 rounded font-mono font-bold tracking-wider">PORTAL</span>
+        </div>
+        <AdminSidebar />
+      </aside>
+      
+      <div className={styles.contentColumn}>
+        <AdminTopbar />
+        <div className={styles.content + " p-4 md:p-6"}>
+          <div className="max-w-full w-full mx-auto">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+

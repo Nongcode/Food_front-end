@@ -1,0 +1,472 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name")
+  role         String   @default("editor")
+  status       String   @default("active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+model SiteSetting {
+  settingKey   String   @id @map("setting_key")
+  settingValue String?  @map("setting_value")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
+model Banner {
+  id         Int      @id @default(autoincrement())
+  title      String?
+  subtitle   String?
+  imageUrl   String   @map("image_url")
+  linkUrl    String?  @map("link_url")
+  bannerType String   @default("homepage") @map("banner_type")
+  mediaType  String   @default("image") @map("media_type")
+  status     String   @default("Đang mở")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("banners")
+}
+
+model NavigationMenu {
+  id        Int      @id @default(autoincrement())
+  label     String
+  url       String
+  menuOrder Int      @default(0) @map("menu_order")
+  location  String   @default("header")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("navigation_menus")
+}
+
+model Destination {
+  id               Int              @id @default(autoincrement())
+  name             String           @unique
+  slug             String?          @unique
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  packages         Package[]
+  localSpecialties LocalSpecialty[]
+  posts            Post[]
+
+  @@map("destinations")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  slug      String?  @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  posts     Post[]
+
+  @@map("categories")
+}
+
+model PackageCategory {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  packages    Package[]
+
+  @@map("package_categories")
+}
+
+model Author {
+  id        Int      @id @default(autoincrement())
+  name      String
+  avatarUrl String?  @map("avatar_url")
+  role      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  posts     Post[]
+
+  @@map("authors")
+}
+
+model Package {
+  id            Int                     @id @default(autoincrement())
+  slug          String                  @unique
+  name          String
+  categoryId    Int?                    @map("category_id")
+  category      PackageCategory?        @relation(fields: [categoryId], references: [id])
+  destinationId Int?                    @map("destination_id")
+  destination   Destination?            @relation(fields: [destinationId], references: [id])
+  offerId       Int?                    @map("offer_id")
+  offer         Offer?                  @relation(fields: [offerId], references: [id])
+  duration      String?
+  priceText     String?                 @map("price_text")
+  price         Int?
+  priceUnit     String?                 @map("price_unit")
+  summary       String?
+  description   String?
+  minPeople     Int?                    @map("min_people")
+  maxPeople     Int?                    @map("max_people")
+  peopleNote    String?                 @map("people_note")
+  imageUrl      String?                 @map("image_url")
+  detailContent Json?                   @map("detail_content")
+  status        String                  @default("Đang mở")
+  createdAt     DateTime                @default(now()) @map("created_at")
+  updatedAt     DateTime                @updatedAt @map("updated_at")
+  collections   PackageCollectionItem[]
+  posts         Post[]
+  detail        PackageDetail?
+
+  @@map("packages")
+}
+
+model PackageDetail {
+  id             Int      @id @default(autoincrement())
+  packageId      Int      @unique @map("package_id")
+  bannerImageUrl String?  @map("banner_image_url")
+  gallery        Json?
+  overview       String?
+  highlights     Json?
+  offers         Json?
+  included       Json?
+  itinerary      Json?
+  benefits       Json?
+  consultTitle   String?  @map("consult_title")
+  consultCopy    String?  @map("consult_copy")
+  consultPoints  Json?    @map("consult_points")
+  seoTitle       String?  @map("seo_title")
+  seoDescription String?  @map("seo_description")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  package        Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@map("package_details")
+}
+
+model PackageCollection {
+  id          Int                     @id @default(autoincrement())
+  eyebrow     String?
+  title       String
+  description String?
+  accent      String?
+  createdAt   DateTime                @default(now()) @map("created_at")
+  updatedAt   DateTime                @updatedAt @map("updated_at")
+  items       PackageCollectionItem[]
+
+  @@map("package_collections")
+}
+
+model PackageCollectionItem {
+  collectionId Int               @map("collection_id")
+  packageId    Int               @map("package_id")
+  sortOrder    Int               @default(0) @map("sort_order")
+  collection   PackageCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  package      Package           @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, packageId])
+  @@map("package_collection_items")
+}
+
+model Post {
+  id               Int          @id @default(autoincrement())
+  title            String
+  slug             String?      @unique
+  categoryId       Int?         @map("category_id")
+  authorId         Int?         @map("author_id")
+  destinationId    Int?         @map("destination_id")
+  relatedPackageId Int?         @map("related_package_id")
+  category         Category?    @relation(fields: [categoryId], references: [id])
+  author           Author?      @relation(fields: [authorId], references: [id])
+  destination      Destination? @relation(fields: [destinationId], references: [id])
+  relatedPackage   Package?     @relation(fields: [relatedPackageId], references: [id])
+
+  excerpt         String?
+  summary         String?
+  imageUrl        String? @map("image_url")
+  contentImageUrl String? @map("content_image_url")
+  readTime        String? @map("read_time")
+  seoDescription  String? @map("seo_description")
+
+  contentBlocks Json? @map("content_blocks")
+
+  status      String    @default("Bản nháp")
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("posts")
+}
+
+model Offer {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  tag         String?
+  imageUrl    String?   @map("image_url")
+  validUntil  DateTime? @map("valid_until")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  packages    Package[]
+
+  @@map("offers")
+}
+
+model Booking {
+  id                Int      @id @default(autoincrement())
+  customerName      String   @map("customer_name")
+  email             String?
+  phone             String
+  tourName          String?  @map("tour_name")
+  travelDate        String?  @map("travel_date")
+  numberOfTravelers Int      @default(1) @map("number_of_travelers")
+  totalPrice        String?  @map("total_price")
+  notes             String?
+  adminNotes        String?  @map("admin_notes")
+  status            String   @default("Chờ xử lý")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("bookings")
+}
+
+model Language {
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  name       String
+  nativeName String   @map("native_name")
+  flag       String?
+  isActive   Boolean  @default(true) @map("is_active")
+  isDefault  Boolean  @default(false) @map("is_default")
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  staticValues StaticTranslationValue[]
+
+  @@map("languages")
+}
+
+model StaticTranslationKey {
+  id          Int      @id @default(autoincrement())
+  namespace   String
+  key         String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  values StaticTranslationValue[]
+
+  @@unique([namespace, key])
+  @@map("static_translation_keys")
+}
+
+model StaticTranslationValue {
+  id        Int      @id @default(autoincrement())
+  keyId     Int      @map("key_id")
+  locale    String
+  value     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  key      StaticTranslationKey @relation(fields: [keyId], references: [id], onDelete: Cascade)
+  language Language?            @relation(fields: [locale], references: [code], onDelete: Cascade)
+
+  @@unique([keyId, locale])
+  @@map("static_translation_values")
+}
+
+model ContentTranslation {
+  id         Int      @id @default(autoincrement())
+  entityType String   @map("entity_type")
+  entityId   Int      @map("entity_id")
+  locale     String
+  fields     Json
+  sourceHash String   @map("source_hash")
+  status     String   @default("machine")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([entityType, entityId, locale])
+  @@index([entityType, entityId])
+  @@map("content_translations")
+}
+
+model Review {
+  id           Int      @id @default(autoincrement())
+  customerName String   @map("customer_name")
+  packageName  String   @map("package_name")
+  rating       Int      @default(5)
+  comment      String
+  status       String   @default("Hiển thị")
+  avatar       String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("reviews")
+}
+
+model Customer {
+  id            Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  phone         String
+  totalBookings Int       @default(0) @map("total_bookings")
+  totalSpent    String    @default("0") @map("total_spent")
+  notes         String?
+  passwordHash  String?   @map("password_hash")
+  address       String?
+  birthday      String?
+  lastLoginAt   DateTime? @map("last_login_at")
+  orders        Order[]
+  inquiries     Inquiry[]
+  status        String    @default("Hoạt động")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("customers")
+}
+
+model LocalSpecialtyCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  type        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  specialties LocalSpecialty[]
+
+  @@map("local_specialty_categories")
+}
+
+model LocalSpecialty {
+  id   Int    @id @default(autoincrement())
+  slug String @unique
+  name String
+  type String
+
+  categoryId Int?                    @map("category_id")
+  category   LocalSpecialtyCategory? @relation(fields: [categoryId], references: [id])
+
+  destinationId Int?         @map("destination_id")
+  destination   Destination? @relation(fields: [destinationId], references: [id])
+
+  description String? @db.Text
+  imageUrl    String? @map("image_url")
+  priceText   String? @map("price_text")
+  price       Int?
+  priceUnit   String? @map("price_unit")
+  whereToBuy  String? @map("where_to_buy")
+  gallery     Json?
+
+  status String @default("Hiển thị")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  detail LocalSpecialtyDetail?
+
+  @@map("local_specialties")
+}
+
+model LocalSpecialtyDetail {
+  id             Int            @id @default(autoincrement())
+  specialtyId    Int            @unique @map("specialty_id")
+  bannerImageUrl String?        @map("banner_image_url")
+  overview       String?        @db.Text
+  history        String?        @db.Text
+  ingredients    String?        @db.Text
+  howToUse       String?        @db.Text
+  preservation   String?        @db.Text
+  highlights     Json?
+  seoTitle       String?        @map("seo_title")
+  seoDescription String?        @map("seo_description")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  specialty      LocalSpecialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+
+  @@map("local_specialty_details")
+}
+
+model Order {
+  id               Int         @id @default(autoincrement())
+  code             String      @unique
+  customerId       Int         @map("customer_id")
+  customer         Customer    @relation(fields: [customerId], references: [id])
+  status           String      @default("pending")
+  receiverName     String      @map("receiver_name")
+  phone            String
+  email            String      @default("")
+  address          String
+  note             String?
+  subtotal         Int
+  packingFee       Int         @map("packing_fee")
+  total            Int
+  hasUnpricedItems Boolean     @default(false) @map("has_unpriced_items")
+  cancelReason     String?     @map("cancel_reason")
+  cancelledBy      String?     @map("cancelled_by")
+  cancelledAt      DateTime?   @map("cancelled_at")
+  adminNote        String?     @map("admin_note")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+  items            OrderItem[]
+
+  @@index([customerId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int     @map("order_id")
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemType  String  @map("item_type")
+  itemId    Int     @map("item_id")
+  slug      String
+  name      String
+  image     String?
+  unitPrice Int?    @map("unit_price")
+  unit      String?
+  quantity  Int
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Inquiry {
+  id           Int      @id @default(autoincrement())
+  customerId   Int      @map("customer_id")
+  customer     Customer @relation(fields: [customerId], references: [id])
+  requestType  String   @map("request_type")
+  products     String?
+  quantity     String?
+  budget       String?
+  occasion     String?
+  deliveryArea String?  @map("delivery_area")
+  notes        String?
+  contactName  String   @map("contact_name")
+  contactPhone String   @map("contact_phone")
+  contactEmail String?  @map("contact_email")
+  status       String   @default("new")
+  adminNote    String?  @map("admin_note")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([customerId])
+  @@map("inquiries")
+}
